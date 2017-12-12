@@ -14,17 +14,17 @@ namespace Running
     public class MainActivity : Activity
     {
         Button b1, b2, b3;
-
+        RunningView run;
+        
         //voor als de app start
         protected override void OnCreate(Bundle b)
         {
             base.OnCreate(b);
-
+            
             LinearLayout layout;
             layout = new LinearLayout(this);
             LinearLayout layout2;
             layout2 = new LinearLayout(this);
-            RunningView run;
             run = new RunningView(this);
             LinearLayout.LayoutParams param;
             param = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent, 0.25f);
@@ -56,6 +56,7 @@ namespace Running
         //wat gebeurd er als je de kaart moet centreren
         private void B1_Click(object sender, System.EventArgs e)
         {
+            run.Reset();
         }
 
         //wat gebeurd er als je gaat starten/stoppen
@@ -73,6 +74,7 @@ namespace Running
     {
         Bitmap p, p1;
         float Schaal, Hoek;
+        double noord, oost;
         ScaleGestureDetector det;
 
         //initialiseer de eigen view
@@ -88,7 +90,7 @@ namespace Running
 
             //laad de plaatjes
             p = BitmapFactory.DecodeResource(c.Resources, Resource.Drawable.Utrecht, options);
-            p1 = BitmapFactory.DecodeResource(c.Resources, Resource.Drawable.character2);
+            p1 = BitmapFactory.DecodeResource(c.Resources, Resource.Drawable.character2, options);
 
             //laad de sensor voor kompas
             SensorManager sm = (SensorManager)c.GetSystemService(Context.SensorService);
@@ -99,9 +101,15 @@ namespace Running
             Criteria crit = new Criteria();
             crit.Accuracy = Accuracy.Fine;
             string lp = lm.GetBestProvider(crit, true);
-            lm.RequestLocationUpdates(lp, 0, 0, this);
+            lm.RequestLocationUpdates(lp, 2000, 1, this);
         }
 
+        //voor resetten van de view, te gebruiken bij de knop reset
+        public void Reset()
+        {
+
+        }
+        
         //tekent de kaart
         protected override void OnDraw(Canvas canvas)
         {
@@ -110,13 +118,18 @@ namespace Running
                 Schaal = Math.Min(((float)this.Width) / this.p1.Width, ((float)this.Height) / this.p1.Height);
 
             Matrix mat = new Matrix();
-            mat.PostTranslate(-this.p1.Width / 2, -this.p1.Height / 2);
+            mat.PostTranslate(-this.p.Width / 2, -this.p.Height / 2);
             mat.PostScale(this.Schaal, this.Schaal);
-            mat.PostRotate(-this.Hoek);
             mat.PostTranslate(this.Width / 2, this.Height / 2);
 
-            canvas.DrawBitmap(p, 0, 0, new Paint());
-            canvas.DrawBitmap(this.p1, mat, new Paint());
+            Matrix mat2 = new Matrix();
+            mat2.PostTranslate(-this.p1.Width / 2, -this.p1.Height / 2);
+            mat2.PostRotate(-this.Hoek);
+            //x, y moet op locatie noorderbreedte/oosterlengte
+            mat2.PostTranslate(this.Width / 2, this.Height / 2);
+           
+            canvas.DrawBitmap(p, mat, new Paint());
+            canvas.DrawBitmap(this.p1, mat2, new Paint());
         }
 
 
@@ -137,8 +150,8 @@ namespace Running
         //voor bepalen van locatie
         public void OnLocationChanged(Location loc)
         {
-            double noord = loc.Latitude;
-            double oost = loc.Longitude;
+            noord = loc.Latitude;
+            oost = loc.Longitude;
 
             //schrijf een string met de info over waar men zich bevindt
             string info = $"{noord} graden noorderbreedte, {oost} graden oosterlengte";
