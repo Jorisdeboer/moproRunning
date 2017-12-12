@@ -7,6 +7,7 @@ using Android.Content;
 using Android.Hardware;
 using Android.Locations;
 using System;
+using Android.Hardware.Location;
 
 namespace Running
 {
@@ -99,7 +100,7 @@ namespace Running
             Criteria crit = new Criteria();
             crit.Accuracy = Accuracy.Fine;
             string lp = lm.GetBestProvider(crit, true);
-            lm.RequestLocationUpdates(lp, 0, 0, this);
+            lm.RequestLocationUpdates(lp, 2000, 1, this);
         }
 
         //tekent de kaart
@@ -114,6 +115,7 @@ namespace Running
             mat.PostScale(this.Schaal, this.Schaal);
             mat.PostRotate(-this.Hoek);
             mat.PostTranslate(this.Width / 2, this.Height / 2);
+
 
             canvas.DrawBitmap(p, 0, 0, new Paint());
             canvas.DrawBitmap(this.p1, mat, new Paint());
@@ -139,6 +141,7 @@ namespace Running
         {
             double noord = loc.Latitude;
             double oost = loc.Longitude;
+
 
             //schrijf een string met de info over waar men zich bevindt
             string info = $"{noord} graden noorderbreedte, {oost} graden oosterlengte";
