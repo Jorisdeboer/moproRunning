@@ -9,6 +9,7 @@ using Android.Locations;
 using System;
 using static Android.Views.GestureDetector;
 
+
 namespace Running
 {
     [Activity(Label = "Running", MainLauncher = true)]
@@ -78,6 +79,7 @@ namespace Running
         ScaleGestureDetector det;
         GestureDetector det2;
         float Schaal, Hoek;
+        bool schalen = true;
 
         //initialiseer de eigen view
         public RunningView(Context c) : base(c)
@@ -124,6 +126,19 @@ namespace Running
             mat.PostTranslate(-this.p.Width / 2, -this.p.Height / 2);
             mat.PostScale(this.Schaal, this.Schaal);
             mat.PostTranslate(this.Width / 2, this.Height / 2);
+            if (p.Width <= this.Width / 2)
+            {
+                schalen = false;
+            }
+
+            if(p.Width >= this.Width * 2)
+            {
+                schalen = false;
+            }
+
+            else
+                schalen = true;
+
 
             //voor de gebruiker
             Matrix mat2 = new Matrix();
@@ -163,8 +178,9 @@ namespace Running
         //voor pinch bewegingen
         public bool OnScale(ScaleGestureDetector d)
         {
-            this.Schaal *= d.ScaleFactor;
-            this.Invalidate();
+            if (schalen == true)
+            {this.Schaal *= d.ScaleFactor;
+            this.Invalidate();}
             return true;
         }
 
