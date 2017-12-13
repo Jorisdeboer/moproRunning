@@ -7,6 +7,7 @@ using Android.Content;
 using Android.Hardware;
 using Android.Locations;
 using System;
+using static Android.Views.GestureDetector;
 
 namespace Running
 {
@@ -70,12 +71,13 @@ namespace Running
         }
     }
 
-    public class RunningView : View, ISensorEventListener, ILocationListener, ScaleGestureDetector.IOnScaleGestureListener
+    public class RunningView : View, ISensorEventListener, ILocationListener, ScaleGestureDetector.IOnScaleGestureListener, IOnGestureListener
     {
         Bitmap p, p1;
-        float Schaal, Hoek;
-        double noord, oost;
+        PointF plek;
         ScaleGestureDetector det;
+        GestureDetector det2;
+        float Schaal, Hoek;
 
         //initialiseer de eigen view
         public RunningView(Context c) : base(c)
@@ -86,6 +88,7 @@ namespace Running
 
             //voor het aanraken van het scherm
             det = new ScaleGestureDetector(c, this);
+            det2 = new GestureDetector(c, this);
             this.Touch += raakAan;
 
             //laad de plaatjes
@@ -107,7 +110,6 @@ namespace Running
         //voor resetten van de view, te gebruiken bij de knop reset
         public void Reset()
         {
-
         }
         
         //tekent de kaart
@@ -117,14 +119,17 @@ namespace Running
             if (Schaal == 0)
                 Schaal = Math.Min(((float)this.Width) / this.p1.Width, ((float)this.Height) / this.p1.Height);
 
+            //voor kaart zelf
             Matrix mat = new Matrix();
             mat.PostTranslate(-this.p.Width / 2, -this.p.Height / 2);
             mat.PostScale(this.Schaal, this.Schaal);
             mat.PostTranslate(this.Width / 2, this.Height / 2);
 
+            //voor de gebruiker
             Matrix mat2 = new Matrix();
             mat2.PostTranslate(-this.p1.Width / 2, -this.p1.Height / 2);
             mat2.PostRotate(-this.Hoek);
+
             //x, y moet op locatie noorderbreedte/oosterlengte
             mat2.PostTranslate(this.Width / 2, this.Height / 2);
            
@@ -145,19 +150,17 @@ namespace Running
         private void raakAan(object sender, TouchEventArgs e)
         {
             det.OnTouchEvent(e.Event);
+            det2.OnTouchEvent(e.Event);
         }
 
         //voor bepalen van locatie
         public void OnLocationChanged(Location loc)
         {
-            noord = loc.Latitude;
-            oost = loc.Longitude;
-
-            //schrijf een string met de info over waar men zich bevindt
-            string info = $"{noord} graden noorderbreedte, {oost} graden oosterlengte";
+            plek = Projectie.Geo2RD(loc);
+            this.Invalidate();
         }
 
-        //voor pinch en drag bewegingen
+        //voor pinch bewegingen
         public bool OnScale(ScaleGestureDetector d)
         {
             this.Schaal *= d.ScaleFactor;
@@ -165,9 +168,40 @@ namespace Running
             return true;
         }
 
+        //voor drag bewegingen
+        public bool OnScroll(MotionEvent m1, MotionEvent m2, float x, float y)
+        {
+
+            this.Invalidate();
+            return true;
+        }
+
+
+
         //BEGIN VAN OVERIG
         //overige methodes die we niet hoeven te gebruiken
         public bool OnScaleBegin(ScaleGestureDetector d)
+        {
+            return true;
+        }
+
+        public bool OnSingleTapUp(MotionEvent me)
+        {
+            return true;
+        }
+
+        public void OnShowPress(MotionEvent me)
+        { }
+
+        public void OnLongPress(MotionEvent me)
+        { }
+
+        public bool OnFling(MotionEvent m1, MotionEvent m2, float x, float y)
+        {
+            return true;
+        }
+        
+        public bool OnDown(MotionEvent me)
         {
             return true;
         }
@@ -187,6 +221,5 @@ namespace Running
         public void OnAccuracyChanged(Sensor s, SensorStatus ss)
         { }
         //EIND VAN OVERIGE METHODE, WEL LATEN STAAN
-
     }
 }
