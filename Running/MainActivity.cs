@@ -79,7 +79,6 @@ namespace Running
         ScaleGestureDetector det;
         GestureDetector det2;
         float Schaal, Hoek;
-        bool schalen = true;
 
         //initialiseer de eigen view
         public RunningView(Context c) : base(c)
@@ -119,25 +118,21 @@ namespace Running
         {
             base.OnDraw(canvas);
             if (Schaal == 0)
-                Schaal = Math.Min(((float)this.Width) / this.p1.Width, ((float)this.Height) / this.p1.Height);
+                Schaal = Math.Min(((float)this.Width) / this.p.Width, ((float)this.Height) / this.p.Height);
+
+
 
             //voor kaart zelf
             Matrix mat = new Matrix();
             mat.PostTranslate(-this.p.Width / 2, -this.p.Height / 2);
+            if (Schaal > (0.005 * this.Width))
+                Schaal = (0.005f * this.Width);
+            if (Schaal < Math.Min(((float)this.Width) / this.p.Width, ((float)this.Height) / this.p.Height))
+            Schaal = Math.Min(((float)this.Width) / this.p.Width, ((float)this.Height) / this.p.Height);
             mat.PostScale(this.Schaal, this.Schaal);
             mat.PostTranslate(this.Width / 2, this.Height / 2);
-            if (p.Width <= this.Width / 2)
-            {
-                schalen = false;
-            }
 
-            if(p.Width >= this.Width * 2)
-            {
-                schalen = false;
-            }
 
-            else
-                schalen = true;
 
 
             //voor de gebruiker
@@ -178,9 +173,8 @@ namespace Running
         //voor pinch bewegingen
         public bool OnScale(ScaleGestureDetector d)
         {
-            if (schalen == true)
-            {this.Schaal *= d.ScaleFactor;
-            this.Invalidate();}
+            this.Schaal *= d.ScaleFactor;
+            this.Invalidate();
             return true;
         }
 
