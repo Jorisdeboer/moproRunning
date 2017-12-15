@@ -7,6 +7,8 @@ using Android.Content;
 using Android.Hardware;
 using Android.Locations;
 using System;
+using static Android.Views.GestureDetector;
+
 
 namespace Running
 {
@@ -14,17 +16,17 @@ namespace Running
     public class MainActivity : Activity
     {
         Button b1, b2, b3;
-
+        RunningView run;
+        
         //voor als de app start
         protected override void OnCreate(Bundle b)
         {
             base.OnCreate(b);
-
+            
             LinearLayout layout;
             layout = new LinearLayout(this);
             LinearLayout layout2;
             layout2 = new LinearLayout(this);
-            RunningView run;
             run = new RunningView(this);
             LinearLayout.LayoutParams param;
             param = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent, 0.25f);
@@ -56,6 +58,7 @@ namespace Running
         //wat gebeurd er als je de kaart moet centreren
         private void B1_Click(object sender, System.EventArgs e)
         {
+            run.Reset();
         }
 
         //wat gebeurd er als je gaat starten/stoppen
@@ -69,11 +72,15 @@ namespace Running
         }
     }
 
-    public class RunningView : View, ISensorEventListener, ILocationListener, ScaleGestureDetector.IOnScaleGestureListener
+    public class RunningView : View, ISensorEventListener, ILocationListener, ScaleGestureDetector.IOnScaleGestureListener, IOnGestureListener
     {
+        Matrix mat, mat2;
         Bitmap p, p1;
-        float Schaal, Hoek;
+        PointF plek, centrum;
         ScaleGestureDetector det;
+        GestureDetector det2;
+        float Schaal, Hoek, dragx, dragy, midx, midy;
+        bool pinching = false;
 
         //initialiseer de eigen view
         public RunningView(Context c) : base(c)
@@ -84,11 +91,12 @@ namespace Running
 
             //voor het aanraken van het scherm
             det = new ScaleGestureDetector(c, this);
+            det2 = new GestureDetector(c, this);
             this.Touch += raakAan;
 
             //laad de plaatjes
             p = BitmapFactory.DecodeResource(c.Resources, Resource.Drawable.Utrecht, options);
-            p1 = BitmapFactory.DecodeResource(c.Resources, Resource.Drawable.character2);
+            p1 = BitmapFactory.DecodeResource(c.Resources, Resource.Drawable.character2, options);
 
             //laad de sensor voor kompas
             SensorManager sm = (SensorManager)c.GetSystemService(Context.SensorService);
@@ -99,26 +107,73 @@ namespace Running
             Criteria crit = new Criteria();
             crit.Accuracy = Accuracy.Fine;
             string lp = lm.GetBestProvider(crit, true);
-            lm.RequestLocationUpdates(lp, 0, 0, this);
+            lm.RequestLocationUpdates(lp, 2000, 1, this);
+            centrum = new PointF(139000, 455500);
+            plek = new PointF(138300, 454300);
+        }
+
+        //voor resetten van de view, te gebruiken bij de knop reset
+        public void Reset()
+        {
+            dragx = 0;
+            dragy = 0;
+            mat = new Matrix();
+            mat.PostTranslate(-this.p.Width / 2, -this.p.Height / 2);
+            mat.PostScale(this.Schaal, this.Schaal);
+            //deze locatie wordt door dragx en dragy veranderd
+            mat.PostTranslate(this.Width / 2 - dragx, this.Height / 2 - dragy);
+            this.Invalidate();
         }
 
         //tekent de kaart
         protected override void OnDraw(Canvas canvas)
         {
             base.OnDraw(canvas);
+
+            midx = (centrum.X - 136000) * 0.4f;
+            midy = -(centrum.Y - 458000) * 0.4f;
+
+            //voor x waarde gebruiker
+            float ax = plek.X - centrum.X;
+            float px = ax * 0.4f;
+            float sx = px * Schaal;
+            float x = this.Width / 2 + sx;
+
+            //voor y waarde gebruiker
+            float ay = plek.Y - centrum.Y;
+            float py = ay * 0.4f;
+            float sy = py * Schaal;
+            float y = this.Height / 2 - sy;
+
             if (Schaal == 0)
-                Schaal = Math.Min(((float)this.Width) / this.p1.Width, ((float)this.Height) / this.p1.Height);
+                Schaal = Math.Min(((float)this.Width) / this.p.Width, ((float)this.Height) / this.p.Height);
 
-            Matrix mat = new Matrix();
-            mat.PostTranslate(-this.p1.Width / 2, -this.p1.Height / 2);
+            //voor kaart zelf
+            mat = new Matrix();
+            mat.PostTranslate(-midx, -midy);
+            if (Schaal > (0.005 * this.Width))
+            {
+              Schaal = (0.005f * this.Width);
+            }
+            if (Schaal < Math.Min(((float)this.Width) / this.p.Width, ((float)this.Height) / this.p.Height))
+            {
+              Schaal = Math.Min(((float)this.Width) / this.p.Width, ((float)this.Height) / this.p.Height);
+            }
             mat.PostScale(this.Schaal, this.Schaal);
-            mat.PostRotate(-this.Hoek);
-            mat.PostTranslate(this.Width / 2, this.Height / 2);
+            //deze locatie wordt door dragx en dragy veranderd
+            mat.PostTranslate(this.Width / 2, this.Height / 2);           
 
-            canvas.DrawBitmap(p, 0, 0, new Paint());
-            canvas.DrawBitmap(this.p1, mat, new Paint());
+            //voor de gebruiker
+            mat2 = new Matrix();
+            mat2.PostTranslate(-this.p1.Width / 2, -this.p1.Height / 2);
+            mat2.PostRotate(-this.Hoek);
+            //x, y moet op locatie
+            mat2.PostTranslate(x, y);
+            
+            //teken de twee tekeningen
+            canvas.DrawBitmap(p, mat, new Paint());
+            canvas.DrawBitmap(this.p1, mat2, new Paint());
         }
-
 
         //voor orientation naar het noorden
         public void OnSensorChanged(SensorEvent s)
@@ -132,29 +187,69 @@ namespace Running
         private void raakAan(object sender, TouchEventArgs e)
         {
             det.OnTouchEvent(e.Event);
+            if(e.Event.Action == MotionEventActions.Pointer2Down && e.Event.Action == MotionEventActions.Pointer1Down)
+            {
+                pinching = true;
+            }
+            else if (!pinching)
+            {
+                det2.OnTouchEvent(e.Event);
+                this.Invalidate();
+            }
         }
 
         //voor bepalen van locatie
         public void OnLocationChanged(Location loc)
         {
-            double noord = loc.Latitude;
-            double oost = loc.Longitude;
-
-            //schrijf een string met de info over waar men zich bevindt
-            string info = $"{noord} graden noorderbreedte, {oost} graden oosterlengte";
+            plek = Projectie.Geo2RD(loc);
+            this.Invalidate();
         }
 
-        //voor pinch en drag bewegingen
+        //voor pinch bewegingen
         public bool OnScale(ScaleGestureDetector d)
         {
             this.Schaal *= d.ScaleFactor;
             this.Invalidate();
+            pinching = false;
             return true;
         }
+
+        //voor drag bewegingen
+        public bool OnScroll(MotionEvent m1, MotionEvent m2, float x, float y)
+        {
+            dragx = (x / Schaal) / 0.4f;
+            dragy = (y / Schaal) / 0.4f;
+
+            centrum = new PointF(centrum.X + dragx, centrum.Y - dragy);
+            this.Invalidate();
+            return true;
+        }
+
 
         //BEGIN VAN OVERIG
         //overige methodes die we niet hoeven te gebruiken
         public bool OnScaleBegin(ScaleGestureDetector d)
+        {
+            return true;
+        }
+
+        public bool OnSingleTapUp(MotionEvent me)
+        {
+            return true;
+        }
+
+        public void OnShowPress(MotionEvent me)
+        { }
+
+        public void OnLongPress(MotionEvent me)
+        { }
+
+        public bool OnFling(MotionEvent m1, MotionEvent m2, float x, float y)
+        {
+            return true;
+        }
+        
+        public bool OnDown(MotionEvent me)
         {
             return true;
         }
@@ -174,6 +269,5 @@ namespace Running
         public void OnAccuracyChanged(Sensor s, SensorStatus ss)
         { }
         //EIND VAN OVERIGE METHODE, WEL LATEN STAAN
-
     }
 }
