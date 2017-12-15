@@ -133,8 +133,6 @@ namespace Running
             mat.PostTranslate(this.Width / 2, this.Height / 2);
 
 
-
-
             //voor de gebruiker
             Matrix mat2 = new Matrix();
             mat2.PostTranslate(-this.p1.Width / 2, -this.p1.Height / 2);
