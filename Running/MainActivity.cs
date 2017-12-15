@@ -74,12 +74,13 @@ namespace Running
 
     public class RunningView : View, ISensorEventListener, ILocationListener, ScaleGestureDetector.IOnScaleGestureListener, IOnGestureListener
     {
+        Matrix mat, mat2;
         Bitmap p, p1;
         PointF plek;
         ScaleGestureDetector det;
         GestureDetector det2;
-        float Schaal, Hoek;
-        bool schalen = true;
+        float Schaal, Hoek, dragx, dragy;
+        bool pinching = false;
 
         //initialiseer de eigen view
         public RunningView(Context c) : base(c)
@@ -112,8 +113,14 @@ namespace Running
         //voor resetten van de view, te gebruiken bij de knop reset
         public void Reset()
         {
+            mat = new Matrix();
+            mat.PostTranslate(-this.p.Width / 2, -this.p.Height / 2);
+            mat.PostScale(this.Schaal, this.Schaal);
+            //deze locatie wordt door dragx en dragy veranderd
+            mat.PostTranslate(this.Width / 2 - dragx, this.Height / 2 - dragy);
+            this.Invalidate();
         }
-        
+
         //tekent de kaart
         protected override void OnDraw(Canvas canvas)
         {
@@ -122,36 +129,23 @@ namespace Running
                 Schaal = Math.Min(((float)this.Width) / this.p1.Width, ((float)this.Height) / this.p1.Height);
 
             //voor kaart zelf
-            Matrix mat = new Matrix();
+            mat = new Matrix();
             mat.PostTranslate(-this.p.Width / 2, -this.p.Height / 2);
             mat.PostScale(this.Schaal, this.Schaal);
-            mat.PostTranslate(this.Width / 2, this.Height / 2);
-            if (p.Width <= this.Width / 2)
-            {
-                schalen = false;
-            }
-
-            if(p.Width >= this.Width * 2)
-            {
-                schalen = false;
-            }
-
-            else
-                schalen = true;
-
+            //deze locatie wordt door dragx en dragy veranderd
+            mat.PostTranslate(this.Width / 2 - dragx, this.Height / 2 - dragy);           
 
             //voor de gebruiker
-            Matrix mat2 = new Matrix();
+            mat2 = new Matrix();
             mat2.PostTranslate(-this.p1.Width / 2, -this.p1.Height / 2);
             mat2.PostRotate(-this.Hoek);
-
-            //x, y moet op locatie noorderbreedte/oosterlengte
+            //x, y moet op locatie
             mat2.PostTranslate(this.Width / 2, this.Height / 2);
            
+            //teken de twee tekeningen
             canvas.DrawBitmap(p, mat, new Paint());
             canvas.DrawBitmap(this.p1, mat2, new Paint());
         }
-
 
         //voor orientation naar het noorden
         public void OnSensorChanged(SensorEvent s)
@@ -165,7 +159,15 @@ namespace Running
         private void raakAan(object sender, TouchEventArgs e)
         {
             det.OnTouchEvent(e.Event);
-            det2.OnTouchEvent(e.Event);
+            if(e.Event.Action == MotionEventActions.Pointer2Down && e.Event.Action == MotionEventActions.Pointer1Down)
+            {
+                pinching = true;
+            }
+            else if (!pinching)
+            {
+                det2.OnTouchEvent(e.Event);
+                this.Invalidate();
+            }
         }
 
         //voor bepalen van locatie
@@ -178,20 +180,20 @@ namespace Running
         //voor pinch bewegingen
         public bool OnScale(ScaleGestureDetector d)
         {
-            if (schalen == true)
-            {this.Schaal *= d.ScaleFactor;
-            this.Invalidate();}
+            this.Schaal *= d.ScaleFactor;
+            this.Invalidate();
+            pinching = false;
             return true;
         }
 
         //voor drag bewegingen
         public bool OnScroll(MotionEvent m1, MotionEvent m2, float x, float y)
         {
-
+            dragx += x;
+            dragy += y;                
             this.Invalidate();
             return true;
         }
-
 
 
         //BEGIN VAN OVERIG
