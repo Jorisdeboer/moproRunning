@@ -113,6 +113,8 @@ namespace Running
         //voor resetten van de view, te gebruiken bij de knop reset
         public void Reset()
         {
+            dragx = 0;
+            dragy = 0;
             mat = new Matrix();
             mat.PostTranslate(-this.p.Width / 2, -this.p.Height / 2);
             mat.PostScale(this.Schaal, this.Schaal);
