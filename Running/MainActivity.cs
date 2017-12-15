@@ -76,10 +76,10 @@ namespace Running
     {
         Matrix mat, mat2;
         Bitmap p, p1;
-        PointF plek;
+        PointF plek, centrum;
         ScaleGestureDetector det;
         GestureDetector det2;
-        float Schaal, Hoek, dragx, dragy;
+        float Schaal, Hoek, dragx, dragy, midx, midy;
         bool pinching = false;
 
         //initialiseer de eigen view
@@ -108,6 +108,8 @@ namespace Running
             crit.Accuracy = Accuracy.Fine;
             string lp = lm.GetBestProvider(crit, true);
             lm.RequestLocationUpdates(lp, 2000, 1, this);
+            centrum = new PointF(139000, 455500);
+            plek = new PointF(138300, 454300);
         }
 
         //voor resetten van de view, te gebruiken bij de knop reset
@@ -127,23 +129,39 @@ namespace Running
         protected override void OnDraw(Canvas canvas)
         {
             base.OnDraw(canvas);
+
+            midx = (centrum.X - 136000) * 0.4f;
+            midy = -(centrum.Y - 458000) * 0.4f;
+
+            //voor x waarde gebruiker
+            float ax = plek.X - centrum.X;
+            float px = ax * 0.4f;
+            float sx = px * Schaal;
+            float x = this.Width / 2 + sx;
+
+            //voor y waarde gebruiker
+            float ay = plek.Y - centrum.Y;
+            float py = ay * 0.4f;
+            float sy = py * Schaal;
+            float y = this.Height / 2 - sy;
+
             if (Schaal == 0)
-                Schaal = Math.Min(((float)this.Width) / this.p1.Width, ((float)this.Height) / this.p1.Height);
+                Schaal = Math.Min(((float)this.Width) / this.p.Width, ((float)this.Height) / this.p.Height);
 
             //voor kaart zelf
             mat = new Matrix();
-            mat.PostTranslate(-this.p.Width / 2, -this.p.Height / 2);
+            mat.PostTranslate(-midx, -midy);
             mat.PostScale(this.Schaal, this.Schaal);
             //deze locatie wordt door dragx en dragy veranderd
-            mat.PostTranslate(this.Width / 2 - dragx, this.Height / 2 - dragy);           
+            mat.PostTranslate(this.Width / 2, this.Height / 2);           
 
             //voor de gebruiker
             mat2 = new Matrix();
             mat2.PostTranslate(-this.p1.Width / 2, -this.p1.Height / 2);
             mat2.PostRotate(-this.Hoek);
             //x, y moet op locatie
-            mat2.PostTranslate(this.Width / 2, this.Height / 2);
-           
+            mat2.PostTranslate(x, y);
+            
             //teken de twee tekeningen
             canvas.DrawBitmap(p, mat, new Paint());
             canvas.DrawBitmap(this.p1, mat2, new Paint());
@@ -191,8 +209,10 @@ namespace Running
         //voor drag bewegingen
         public bool OnScroll(MotionEvent m1, MotionEvent m2, float x, float y)
         {
-            dragx += x;
-            dragy += y;                
+            dragx = (x / Schaal) / 0.4f;
+            dragy = (y / Schaal) / 0.4f;
+
+            centrum = new PointF(centrum.X + dragx, centrum.Y - dragy);
             this.Invalidate();
             return true;
         }
