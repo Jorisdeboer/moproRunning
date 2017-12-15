@@ -151,6 +151,14 @@ namespace Running
             //voor kaart zelf
             mat = new Matrix();
             mat.PostTranslate(-midx, -midy);
+            if (Schaal > (0.005 * this.Width))
+            {
+              Schaal = (0.005f * this.Width);
+            }
+            if (Schaal < Math.Min(((float)this.Width) / this.p.Width, ((float)this.Height) / this.p.Height))
+            {
+              Schaal = Math.Min(((float)this.Width) / this.p.Width, ((float)this.Height) / this.p.Height);
+            }
             mat.PostScale(this.Schaal, this.Schaal);
             //deze locatie wordt door dragx en dragy veranderd
             mat.PostTranslate(this.Width / 2, this.Height / 2);           
