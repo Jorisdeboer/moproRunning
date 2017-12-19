@@ -7,22 +7,22 @@ using Android.Content;
 using Android.Hardware;
 using Android.Locations;
 using System;
+using System.Collections.Generic;
 using static Android.Views.GestureDetector;
-
 
 namespace Running
 {
     [Activity(Label = "Running", MainLauncher = true)]
     public class MainActivity : Activity
     {
-        Button b1, b2, b3;
+        Button b1, b2, b3, b4;
         RunningView run;
-        
+
         //voor als de app start
         protected override void OnCreate(Bundle b)
         {
             base.OnCreate(b);
-            
+            //initialiseer alle layouts etc.
             LinearLayout layout;
             layout = new LinearLayout(this);
             LinearLayout layout2;
@@ -30,24 +30,30 @@ namespace Running
             run = new RunningView(this);
             LinearLayout.LayoutParams param;
             param = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent, 0.25f);
-
+            //de omlijsting van de buttons
             param.SetMargins(20, 0, 20, 20);
 
+            //alle buttons op een rij
             b1 = new Button(this);
             b1.Text = "Center";
             b2 = new Button(this);
-            b2.Text = "Start/Stop";
+            b2.Text = "Start";
             b3 = new Button(this);
             b3.Text = "Erase";
+            b4 = new Button(this);
+            b4.Text = "Stop";
             b1.Click += B1_Click;
             b2.Click += B2_Click;
             b3.Click += B3_Click;
+            b4.Click += B4_Click;
 
+            //layout van de buttons
             layout.Orientation = Orientation.Horizontal;
             layout.AddView(b1, param);
             layout.AddView(b2, param);
+            layout.AddView(b4, param);
             layout.AddView(b3, param);
-
+            //totale layout
             layout2.Orientation = Orientation.Vertical;
             layout2.AddView(layout);
             layout2.AddView(run);
@@ -61,14 +67,24 @@ namespace Running
             run.Reset();
         }
 
-        //wat gebeurd er als je gaat starten/stoppen
+        //wat gebeurd er als je gaat starten
         private void B2_Click(object sender, System.EventArgs e)
+        {            
+            run.Starting();
+            run.start = !run.start;
+            run.Invalidate();
+        }
+
+        //wat gebeurd er als je op stoppen klikt
+        private void B4_Click(object sender, System.EventArgs e)
         {
+            run.Stopping();
         }
 
         //wat gebeurd er als je wil Erasen
         private void B3_Click(object sender, System.EventArgs e)
         {
+            run.Erase();
         }
     }
 
@@ -77,10 +93,13 @@ namespace Running
         Matrix mat, mat2;
         Bitmap p, p1;
         PointF plek, centrum;
+        List<PointF> alles = new List<PointF>();
         ScaleGestureDetector det;
         GestureDetector det2;
-        float Schaal, Hoek, dragx, dragy, midx, midy;
+        float Schaal, Hoek, dragx, dragy, midx, midy, spelerX, spelerY, rad;
         bool pinching = false;
+        public bool start = false;
+        public bool stop = false;
 
         //initialiseer de eigen view
         public RunningView(Context c) : base(c)
@@ -107,21 +126,51 @@ namespace Running
             Criteria crit = new Criteria();
             crit.Accuracy = Accuracy.Fine;
             string lp = lm.GetBestProvider(crit, true);
-            lm.RequestLocationUpdates(lp, 2000, 1, this);
+            lm.RequestLocationUpdates(lp, 1000, 0, this);
+            //centrum vd kaart en de beginpositie van de gebruiker
             centrum = new PointF(139000, 455500);
-            plek = new PointF(138300, 454300);
+            plek = new PointF(139300, 454300);
+            rad = p1.Width *2;
         }
 
         //voor resetten van de view, te gebruiken bij de knop reset
         public void Reset()
         {
-            dragx = 0;
-            dragy = 0;
-            mat = new Matrix();
-            mat.PostTranslate(-this.p.Width / 2, -this.p.Height / 2);
-            mat.PostScale(this.Schaal, this.Schaal);
-            //deze locatie wordt door dragx en dragy veranderd
-            mat.PostTranslate(this.Width / 2 - dragx, this.Height / 2 - dragy);
+            centrum = plek;
+            this.Invalidate();
+        }
+
+        //om te starten
+        public void Starting()
+        {
+            if (stop == false)
+            {
+                start = true;
+                this.Invalidate();
+            }
+        }
+
+        //om te stoppen
+        public void Stopping()
+        {
+            if (start == true)
+            {
+                stop = true;
+                start = false;
+                this.Invalidate();
+            }
+        }
+
+        //om te erasen
+        public void Erase()
+        {
+            if (stop == true && start == false)
+            {
+                foreach (PointF p in alles)
+                {
+                    alles.Remove(p);
+                }
+            }
             this.Invalidate();
         }
 
@@ -130,49 +179,60 @@ namespace Running
         {
             base.OnDraw(canvas);
 
+            if (Schaal == 0)
+                Schaal = Math.Min(((float)this.Width) / this.p.Width, ((float)this.Height) / this.p.Height);
+            
             midx = (centrum.X - 136000) * 0.4f;
             midy = -(centrum.Y - 458000) * 0.4f;
+            
+            //probeersel voor start/stop
+            if (start == true)
+            {               
+                foreach(PointF p in alles)
+                {
+                    Paint verf = new Paint();
+                    verf.Color = Color.Blue;
+                    canvas.DrawCircle(plek.X, plek.Y, rad, verf);
+                    this.Invalidate();
+                }
+            }
 
             //voor x waarde gebruiker
             float ax = plek.X - centrum.X;
             float px = ax * 0.4f;
             float sx = px * Schaal;
-            float x = this.Width / 2 + sx;
+            spelerX = this.Width / 2 + sx;
 
             //voor y waarde gebruiker
             float ay = plek.Y - centrum.Y;
             float py = ay * 0.4f;
             float sy = py * Schaal;
-            float y = this.Height / 2 - sy;
-
-            if (Schaal == 0)
-                Schaal = Math.Min(((float)this.Width) / this.p.Width, ((float)this.Height) / this.p.Height);
+            spelerY = this.Height / 2 - sy;
 
             //voor kaart zelf
             mat = new Matrix();
             mat.PostTranslate(-midx, -midy);
             if (Schaal > (0.005 * this.Width))
             {
-              Schaal = (0.005f * this.Width);
+                Schaal = (0.005f * this.Width);
             }
             if (Schaal < Math.Min(((float)this.Width) / this.p.Width, ((float)this.Height) / this.p.Height))
             {
-              Schaal = Math.Min(((float)this.Width) / this.p.Width, ((float)this.Height) / this.p.Height);
+                 Schaal = Math.Min(((float)this.Width) / this.p.Width, ((float)this.Height) / this.p.Height);
             }
             mat.PostScale(this.Schaal, this.Schaal);
-            //deze locatie wordt door dragx en dragy veranderd
             mat.PostTranslate(this.Width / 2, this.Height / 2);           
 
             //voor de gebruiker
             mat2 = new Matrix();
             mat2.PostTranslate(-this.p1.Width / 2, -this.p1.Height / 2);
             mat2.PostRotate(-this.Hoek);
-            //x, y moet op locatie
-            mat2.PostTranslate(x, y);
+            mat2.PostTranslate(spelerX, spelerY);
             
             //teken de twee tekeningen
             canvas.DrawBitmap(p, mat, new Paint());
-            canvas.DrawBitmap(this.p1, mat2, new Paint());
+            canvas.DrawBitmap(p1, mat2, new Paint());
+            this.Invalidate();
         }
 
         //voor orientation naar het noorden
@@ -202,6 +262,10 @@ namespace Running
         public void OnLocationChanged(Location loc)
         {
             plek = Projectie.Geo2RD(loc);
+            if (start == true)
+            {
+                alles.Add(plek);
+            }
             this.Invalidate();
         }
 
@@ -218,8 +282,7 @@ namespace Running
         public bool OnScroll(MotionEvent m1, MotionEvent m2, float x, float y)
         {
             dragx = (x / Schaal) / 0.4f;
-            dragy = (y / Schaal) / 0.4f;
-
+            dragy = (y / Schaal) / 0.4f; 
             centrum = new PointF(centrum.X + dragx, centrum.Y - dragy);
             this.Invalidate();
             return true;
