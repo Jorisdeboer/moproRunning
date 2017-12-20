@@ -130,7 +130,7 @@ namespace Running
 
             //centrum vd kaart en de beginpositie van de gebruiker
             centrum = new PointF(139000, 455500);
-            plek = new PointF(139300, 454300);
+            plek = new PointF(138300, 454300);
             rad = p1.Width *2;
         }
 
@@ -200,8 +200,10 @@ namespace Running
             spelerY = this.Height / 2 - sy;
 
             //voor kaart zelf
-            mat = new Matrix();
+            mat = new Matrix();        
             mat.PostTranslate(-midx, -midy);
+
+            //Borders voor schalen
             if (Schaal > (0.005 * this.Width))
             {
                 Schaal = (0.005f * this.Width);
@@ -210,7 +212,15 @@ namespace Running
             {
                  Schaal = Math.Min(((float)this.Width) / this.p.Width, ((float)this.Height) / this.p.Height);
             }
+
             mat.PostScale(this.Schaal, this.Schaal);
+
+            //Borders voor draggen
+            centrum.X = Math.Max(centrum.X, 136000 + ((this.Width / 2)/ Schaal / 0.4f));
+            centrum.X = Math.Min(centrum.X, 142000 - ((this.Width / 2) / Schaal / 0.4f));
+            centrum.Y = Math.Min(centrum.Y, 458000 - ((this.Height / 2) / Schaal / 0.4f));
+            centrum.Y = Math.Max(centrum.Y, 453000 + ((this.Height / 2) / Schaal / 0.4f));
+
             mat.PostTranslate(this.Width / 2, this.Height / 2);           
 
             //voor de gebruiker
@@ -287,7 +297,7 @@ namespace Running
             this.Invalidate();
             return true;
         }
-
+            
 
         //BEGIN VAN OVERIG
         //overige methodes die we niet hoeven te gebruiken
