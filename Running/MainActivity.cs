@@ -127,6 +127,7 @@ namespace Running
             crit.Accuracy = Accuracy.Fine;
             string lp = lm.GetBestProvider(crit, true);
             lm.RequestLocationUpdates(lp, 1000, 0, this);
+
             //centrum vd kaart en de beginpositie van de gebruiker
             centrum = new PointF(139000, 455500);
             plek = new PointF(139300, 454300);
@@ -185,17 +186,6 @@ namespace Running
             midx = (centrum.X - 136000) * 0.4f;
             midy = -(centrum.Y - 458000) * 0.4f;
             
-            //probeersel voor start/stop
-            if (start == true)
-            {               
-                foreach(PointF p in alles)
-                {
-                    Paint verf = new Paint();
-                    verf.Color = Color.Blue;
-                    canvas.DrawCircle(plek.X, plek.Y, rad, verf);
-                    this.Invalidate();
-                }
-            }
 
             //voor x waarde gebruiker
             float ax = plek.X - centrum.X;
@@ -229,11 +219,21 @@ namespace Running
             mat2.PostRotate(-this.Hoek);
             mat2.PostTranslate(spelerX, spelerY);
             
-            //teken de twee tekeningen
+            //teken de kaart
             canvas.DrawBitmap(p, mat, new Paint());
+            //voor start/stop
+            if (start == true)
+            {               
+                foreach(PointF p in alles)
+                {
+                    Paint verf = new Paint();
+                    verf.Color = Color.Blue;
+                    canvas.DrawCircle(plek.X, plek.Y, rad, verf);
+                }
+            }
+            //teken de gebruiker
             canvas.DrawBitmap(p1, mat2, new Paint());
-            this.Invalidate();
-        }
+            }
 
         //voor orientation naar het noorden
         public void OnSensorChanged(SensorEvent s)
