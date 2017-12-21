@@ -57,7 +57,7 @@ namespace Running
             layout2.Orientation = Orientation.Vertical;
             layout2.AddView(layout);
             layout2.AddView(run);
-
+            //display de kaart met de buttons erboven (layout2)
             SetContentView(layout2);
         }
 
@@ -131,7 +131,7 @@ namespace Running
             //centrum vd kaart en de beginpositie van de gebruiker
             centrum = new PointF(139000, 455500);
             plek = new PointF(138300, 454300);
-            rad = p1.Width *2;
+            rad = p1.Width / 2;
         }
 
         //voor resetten van de view, te gebruiken bij de knop reset
@@ -231,19 +231,30 @@ namespace Running
             
             //teken de kaart
             canvas.DrawBitmap(p, mat, new Paint());
-            //voor start/stop
+            //teken de gebruiker
+            canvas.DrawBitmap(p1, mat2, new Paint());
+            //voor de afgelegde track
             if (start == true)
             {               
                 foreach(PointF p in alles)
                 {
                     Paint verf = new Paint();
                     verf.Color = Color.Blue;
-                    canvas.DrawCircle(plek.X, plek.Y, rad, verf);
+                    canvas.DrawCircle(p.X, p.Y, rad, verf);
                 }
             }
-            //teken de gebruiker
-            canvas.DrawBitmap(p1, mat2, new Paint());
+        }
+
+        //voor bepalen van locatie
+        public void OnLocationChanged(Location loc)
+        {
+            plek = Projectie.Geo2RD(loc);
+            if (start == true)
+            {
+                alles.Add(plek);
             }
+            this.Invalidate();
+        }
 
         //voor orientation naar het noorden
         public void OnSensorChanged(SensorEvent s)
@@ -266,17 +277,6 @@ namespace Running
                 det2.OnTouchEvent(e.Event);
                 this.Invalidate();
             }
-        }
-
-        //voor bepalen van locatie
-        public void OnLocationChanged(Location loc)
-        {
-            plek = Projectie.Geo2RD(loc);
-            if (start == true)
-            {
-                alles.Add(plek);
-            }
-            this.Invalidate();
         }
 
         //voor pinch bewegingen
