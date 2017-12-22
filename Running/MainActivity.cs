@@ -31,7 +31,7 @@ namespace Running
             LinearLayout.LayoutParams param;
             param = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent, 0.25f);
             //de omlijsting van de buttons
-            param.SetMargins(20, 0, 20, 20);
+            param.SetMargins(10, 0, 10, 20);
 
             //alle buttons op een rij
             b1 = new Button(this);
@@ -71,8 +71,7 @@ namespace Running
         private void B2_Click(object sender, System.EventArgs e)
         {            
             run.Starting();
-            run.start = !run.start;
-            run.Invalidate();
+
         }
 
         //wat gebeurd er als je op stoppen klikt
@@ -92,11 +91,11 @@ namespace Running
     {
         Matrix mat, mat2;
         Bitmap p, p1;
-        PointF plek, centrum;
+        PointF plek, centrum, route;
         List<PointF> alles = new List<PointF>();
         ScaleGestureDetector det;
         GestureDetector det2;
-        float Schaal, Hoek, dragx, dragy, midx, midy, spelerX, spelerY, rad;
+        float Schaal, Hoek, dragx, dragy, midx, midy, spelerX, spelerY, rad, routeX, routeY;
         bool pinching = false;
         public bool start = false;
         public bool stop = false;
@@ -126,12 +125,11 @@ namespace Running
             Criteria crit = new Criteria();
             crit.Accuracy = Accuracy.Fine;
             string lp = lm.GetBestProvider(crit, true);
-            lm.RequestLocationUpdates(lp, 1000, 0, this);
+            lm.RequestLocationUpdates(lp, 1000, 1, this);
 
             //centrum vd kaart en de beginpositie van de gebruiker
             centrum = new PointF(139000, 455500);
             plek = new PointF(138300, 454300);
-            rad = p1.Width / 2;
         }
 
         //voor resetten van de view, te gebruiken bij de knop reset
@@ -144,7 +142,7 @@ namespace Running
         //om te starten
         public void Starting()
         {
-            if (stop == false)
+            if (start == false)
             {
                 start = true;
                 this.Invalidate();
@@ -156,7 +154,6 @@ namespace Running
         {
             if (start == true)
             {
-                stop = true;
                 start = false;
                 this.Invalidate();
             }
@@ -165,12 +162,9 @@ namespace Running
         //om te erasen
         public void Erase()
         {
-            if (stop == true && start == false)
+            if (start == false)
             {
-                foreach (PointF p in alles)
-                {
-                    alles.Remove(p);
-                }
+                    alles.Clear();
             }
             this.Invalidate();
         }
@@ -233,27 +227,37 @@ namespace Running
             canvas.DrawBitmap(p, mat, new Paint());
             //teken de gebruiker
             canvas.DrawBitmap(p1, mat2, new Paint());
+            
             //voor de afgelegde track
-            if (start == true)
-            {               
-                foreach(PointF p in alles)
+                foreach(PointF q in alles)
                 {
+                    float ax1 = q.X - centrum.X;
+                    float px1 = ax1 * 0.4f;
+                    float sx1 = px1 * Schaal;
+                    routeX = this.Width / 2 + sx1;
+
+                    float ay1 = q.Y - centrum.Y;
+                    float py1 = ay1 * 0.4f;
+                    float sy1 = py1 * Schaal;
+                    routeY = this.Height / 2 - sy1;
+
                     Paint verf = new Paint();
                     verf.Color = Color.Blue;
-                    canvas.DrawCircle(p.X, p.Y, rad, verf);
+                    canvas.DrawCircle(routeX, routeY, 5, verf);
                 }
-            }
+            
         }
 
         //voor bepalen van locatie
         public void OnLocationChanged(Location loc)
         {
             plek = Projectie.Geo2RD(loc);
-            if (start == true)
+             if (start == true)
             {
-                alles.Add(plek);
+                route = new PointF(plek.X, plek.Y);
+                alles.Add(route);
+                this.Invalidate();
             }
-            this.Invalidate();
         }
 
         //voor orientation naar het noorden
