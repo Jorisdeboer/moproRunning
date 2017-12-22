@@ -71,7 +71,6 @@ namespace Running
         private void B2_Click(object sender, System.EventArgs e)
         {            
             run.Starting();
-
         }
 
         //wat gebeurd er als je op stoppen klikt
@@ -83,19 +82,16 @@ namespace Running
         //wat gebeurd er als je wil Erasen
         private void B3_Click(object sender, System.EventArgs e)
         {
-          
-            
+            //voor de vraag om te wissen
             AlertDialog.Builder alert = new AlertDialog.Builder(this);
             alert.SetTitle("Route echt wissen?");
             alert.SetNegativeButton("Nee", NietWissen);
             alert.SetPositiveButton("Ja", WelWissen);
             alert.Show();
             void NietWissen(object o, EventArgs ea)
-            {
-            }
+            { }
             void WelWissen(object o, EventArgs ea)
             {
-
                 run.Erase();
             }
         }
@@ -106,13 +102,14 @@ namespace Running
         Matrix mat, mat2;
         Bitmap p, p1;
         PointF plek, centrum, route;
-        List<PointF> alles = new List<PointF>();
+        List<PointF> alles;
         ScaleGestureDetector det;
         GestureDetector det2;
-        float Schaal, Hoek, dragx, dragy, midx, midy, spelerX, spelerY, rad, routeX, routeY;
+        float Schaal, Hoek, dragx, dragy, midx, midy, spelerX, spelerY, rad;
         bool pinching = false;
         public bool start = false;
         public bool stop = false;
+
 
         //initialiseer de eigen view
         public RunningView(Context c) : base(c)
@@ -139,18 +136,24 @@ namespace Running
             Criteria crit = new Criteria();
             crit.Accuracy = Accuracy.Fine;
             string lp = lm.GetBestProvider(crit, true);
-            lm.RequestLocationUpdates(lp, 1000, 1, this);
+            //positie wordt geupdate elke 500 ms en bij een verandering 
+            lm.RequestLocationUpdates(lp, 500, 0.5f, this);
 
-            //centrum vd kaart en de beginpositie van de gebruiker
+            //beginwaardes declareren
             centrum = new PointF(139000, 455500);
             plek = new PointF(138300, 454300);
             rad = Math.Min(p1.Height / 4, p1.Width / 4);
+            Schaal = 1.25f;
         }
 
         //voor resetten van de view, te gebruiken bij de knop reset
         public void Reset()
         {
-            centrum = plek;
+            centrum.X = Math.Max(plek.X, 136000 + ((this.Width / 2) / Schaal / 0.4f));
+            centrum.X = Math.Min(plek.X, 142000 - ((this.Width / 2) / Schaal / 0.4f));
+            centrum.Y = Math.Min(plek.Y, 458000 - ((this.Height / 2) / Schaal / 0.4f));
+            centrum.Y = Math.Max(plek.Y, 453000 + ((this.Height / 2) / Schaal / 0.4f));
+
             this.Invalidate();
         }
 
@@ -159,7 +162,7 @@ namespace Running
         {
             if (start == false)
             {
-
+                alles = new List<PointF>();
                 start = true;
                 this.Invalidate();
             }
@@ -177,7 +180,7 @@ namespace Running
 
         //om te erasen
         public void Erase()
-        {               
+        {
             alles.Clear();
             this.Invalidate();
         }
@@ -192,7 +195,6 @@ namespace Running
             
             midx = (centrum.X - 136000) * 0.4f;
             midy = -(centrum.Y - 458000) * 0.4f;
-            
 
             //voor x waarde gebruiker
             float ax = plek.X - centrum.X;
@@ -211,7 +213,7 @@ namespace Running
             mat.PostTranslate(-midx, -midy);
 
             //Borders voor schalen
-            if (Schaal > (0.005 * this.Width))
+            if (Schaal > (0.005f * this.Width))
             {
                 Schaal = (0.005f * this.Width);
             }
@@ -219,7 +221,6 @@ namespace Running
             {
                  Schaal = Math.Min(((float)this.Width) / this.p.Width, ((float)this.Height) / this.p.Height);
             }
-
             mat.PostScale(this.Schaal, this.Schaal);
 
             //Borders voor draggen
@@ -238,8 +239,58 @@ namespace Running
             
             //teken de kaart
             canvas.DrawBitmap(p, mat, new Paint());
+	
+	        //teken de afgelegde track
+            if(alles != null)
+            {
+                for(int i = 0; i < alles.Count; i++)
+                {
+                    PointF vorig, nu;
+                    //zet de verf naar de juiste kleur en dikte
+                    Paint verf = new Paint();
+                    verf.Color = Color.Blue;
+                    verf.StrokeWidth = rad;
 
-            //voor de afgelegde track
+                    //omreken van nuX
+                    float ax1 = alles[i].X - centrum.X;
+                    float px1 = ax1 * 0.4f;
+                    float sx1 = px1 * Schaal;
+                    float nuX = this.Width / 2 + sx1;
+                    //omreken van nuY
+                    float ay1 = alles[i].Y - centrum.Y;
+                    float py1 = ay1 * 0.4f;
+                    float sy1 = py1 * Schaal;
+                    float nuY = this.Height / 2 - sy1;
+
+                    if(i-1 >= 0)
+                    {
+                        //omreken van vorigX
+                        float ax2 = alles[i-1].X - centrum.X;
+                        float px2 = ax2 * 0.4f;
+                        float sx2 = px2 * Schaal;
+                        float vorigX = this.Width / 2 + sx2;
+                        //omreken van vorigY
+                        float ay2 = alles[i-1].Y - centrum.Y;
+                        float py2 = ay2 * 0.4f;
+                        float sy2 = py2 * Schaal;
+                        float vorigY = this.Height / 2 - sy2;
+
+                        //bepaal het huidige punt, en het vorige punt
+                        nu = new PointF(nuX, nuY);
+                        vorig = new PointF(vorigX, vorigY);
+
+                        canvas.DrawLine(vorig.X, vorig.Y, nu.X, nu.Y, verf);
+                    }
+                    else
+                    {
+                        canvas.DrawCircle(nuX, nuY, rad, verf);
+                    }
+                }
+            }
+            //teken de gebruiker
+            canvas.DrawBitmap(p1, mat2, new Paint());         
+
+            /*voor de afgelegde track
 
             foreach(PointF q in alles)
             {
@@ -261,10 +312,7 @@ namespace Running
             }
 
             //teken de gebruiker
-            canvas.DrawBitmap(p1, mat2, new Paint());
-            
-
-            
+            canvas.DrawBitmap(p1, mat2, new Paint());*/
         }
 
         //voor bepalen van locatie
