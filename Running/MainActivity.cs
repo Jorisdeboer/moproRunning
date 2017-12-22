@@ -92,7 +92,7 @@ namespace Running
         Matrix mat, mat2;
         Bitmap p, p1;
         PointF plek, centrum, route;
-        List<PointF> alles = new List<PointF>();
+        List<PointF> alles;
         ScaleGestureDetector det;
         GestureDetector det2;
         float Schaal, Hoek, dragx, dragy, midx, midy, spelerX, spelerY, rad;
@@ -145,6 +145,7 @@ namespace Running
         {
             if (start == false)
             {
+                alles = new List<PointF>();
                 start = true;
                 this.Invalidate();
             }
@@ -228,53 +229,54 @@ namespace Running
             canvas.DrawBitmap(p, mat, new Paint());
             
             //voor de afgelegde track
-            for(int i = 0; i < alles.Count; i++)
+            if(start == true)
             {
-                PointF vorig, nu;
-                //zet de verf naar de juiste kleur en dikte
-                Paint verf = new Paint();
-                verf.Color = Color.Blue;
-                verf.StrokeWidth = rad;
-
-                //omreken van nuX
-                float ax1 = alles[i].X - centrum.X;
-                float px1 = ax1 * 0.4f;
-                float sx1 = px1 * Schaal;
-                float nuX = this.Width / 2 + sx1;
-                //omreken van nuY
-                float ay1 = alles[i].Y - centrum.Y;
-                float py1 = ay1 * 0.4f;
-                float sy1 = py1 * Schaal;
-                float nuY = this.Height / 2 - sy1;
-
-                if(i-1 >= 0)
+                for(int i = 0; i < alles.Count; i++)
                 {
-                    //omreken van vorigX
-                    float ax2 = alles[i-1].X - centrum.X;
-                    float px2 = ax2 * 0.4f;
-                    float sx2 = px2 * Schaal;
-                    float vorigX = this.Width / 2 + sx2;
-                    //omreken van vorigY
-                    float ay2 = alles[i-1].Y - centrum.Y;
-                    float py2 = ay2 * 0.4f;
-                    float sy2 = py2 * Schaal;
-                    float vorigY = this.Height / 2 - sy2;
+                    PointF vorig, nu;
+                    //zet de verf naar de juiste kleur en dikte
+                    Paint verf = new Paint();
+                    verf.Color = Color.Blue;
+                    verf.StrokeWidth = rad;
 
-                    //bepaal het huidige punt, en het vorige punt
-                    nu = new PointF(nuX, nuY);
-                    vorig = new PointF(vorigX, vorigY);
+                    //omreken van nuX
+                    float ax1 = alles[i].X - centrum.X;
+                    float px1 = ax1 * 0.4f;
+                    float sx1 = px1 * Schaal;
+                    float nuX = this.Width / 2 + sx1;
+                    //omreken van nuY
+                    float ay1 = alles[i].Y - centrum.Y;
+                    float py1 = ay1 * 0.4f;
+                    float sy1 = py1 * Schaal;
+                    float nuY = this.Height / 2 - sy1;
 
-                    canvas.DrawLine(vorig.X, vorig.Y, nu.X, nu.Y, verf);
-                }
-                else
-                {
-                    canvas.DrawCircle(nuX, nuY, rad, verf);
+                    if(i-1 >= 0)
+                    {
+                        //omreken van vorigX
+                        float ax2 = alles[i-1].X - centrum.X;
+                        float px2 = ax2 * 0.4f;
+                        float sx2 = px2 * Schaal;
+                        float vorigX = this.Width / 2 + sx2;
+                        //omreken van vorigY
+                        float ay2 = alles[i-1].Y - centrum.Y;
+                        float py2 = ay2 * 0.4f;
+                        float sy2 = py2 * Schaal;
+                        float vorigY = this.Height / 2 - sy2;
+
+                        //bepaal het huidige punt, en het vorige punt
+                        nu = new PointF(nuX, nuY);
+                        vorig = new PointF(vorigX, vorigY);
+
+                        canvas.DrawLine(vorig.X, vorig.Y, nu.X, nu.Y, verf);
+                    }
+                    else
+                    {
+                        canvas.DrawCircle(nuX, nuY, rad, verf);
+                    }
                 }
             }
-
             //teken de gebruiker
-            canvas.DrawBitmap(p1, mat2, new Paint());
-            
+            canvas.DrawBitmap(p1, mat2, new Paint());         
         }
 
         //voor bepalen van locatie
