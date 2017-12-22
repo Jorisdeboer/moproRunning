@@ -95,7 +95,7 @@ namespace Running
         List<PointF> alles = new List<PointF>();
         ScaleGestureDetector det;
         GestureDetector det2;
-        float Schaal, Hoek, dragx, dragy, midx, midy, spelerX, spelerY, rad, routeX, routeY;
+        float Schaal, Hoek, dragx, dragy, midx, midy, spelerX, spelerY, rad;
         bool pinching = false;
         public bool start = false;
         public bool stop = false;
@@ -125,11 +125,12 @@ namespace Running
             Criteria crit = new Criteria();
             crit.Accuracy = Accuracy.Fine;
             string lp = lm.GetBestProvider(crit, true);
-            lm.RequestLocationUpdates(lp, 1000, 1, this);
+            lm.RequestLocationUpdates(lp, 500, 0.5f, this);
 
             //centrum vd kaart en de beginpositie van de gebruiker
             centrum = new PointF(139000, 455500);
             plek = new PointF(138300, 454300);
+            rad = Math.Min(p1.Width / 4, p1.Height / 4);
         }
 
         //voor resetten van de view, te gebruiken bij de knop reset
@@ -225,26 +226,54 @@ namespace Running
             
             //teken de kaart
             canvas.DrawBitmap(p, mat, new Paint());
-            //teken de gebruiker
-            canvas.DrawBitmap(p1, mat2, new Paint());
             
             //voor de afgelegde track
-                foreach(PointF q in alles)
+            for(int i = 0; i < alles.Count; i++)
+            {
+                PointF vorig, nu;
+                //zet de verf naar de juiste kleur en dikte
+                Paint verf = new Paint();
+                verf.Color = Color.Blue;
+                verf.StrokeWidth = rad;
+
+                //omreken van nuX
+                float ax1 = alles[i].X - centrum.X;
+                float px1 = ax1 * 0.4f;
+                float sx1 = px1 * Schaal;
+                float nuX = this.Width / 2 + sx1;
+                //omreken van nuY
+                float ay1 = alles[i].Y - centrum.Y;
+                float py1 = ay1 * 0.4f;
+                float sy1 = py1 * Schaal;
+                float nuY = this.Height / 2 - sy1;
+
+                if(i-1 >= 0)
                 {
-                    float ax1 = q.X - centrum.X;
-                    float px1 = ax1 * 0.4f;
-                    float sx1 = px1 * Schaal;
-                    routeX = this.Width / 2 + sx1;
+                    //omreken van vorigX
+                    float ax2 = alles[i-1].X - centrum.X;
+                    float px2 = ax2 * 0.4f;
+                    float sx2 = px2 * Schaal;
+                    float vorigX = this.Width / 2 + sx2;
+                    //omreken van vorigY
+                    float ay2 = alles[i-1].Y - centrum.Y;
+                    float py2 = ay2 * 0.4f;
+                    float sy2 = py2 * Schaal;
+                    float vorigY = this.Height / 2 - sy2;
 
-                    float ay1 = q.Y - centrum.Y;
-                    float py1 = ay1 * 0.4f;
-                    float sy1 = py1 * Schaal;
-                    routeY = this.Height / 2 - sy1;
+                    //bepaal het huidige punt, en het vorige punt
+                    nu = new PointF(nuX, nuY);
+                    vorig = new PointF(vorigX, vorigY);
 
-                    Paint verf = new Paint();
-                    verf.Color = Color.Blue;
-                    canvas.DrawCircle(routeX, routeY, 5, verf);
+                    canvas.DrawLine(vorig.X, vorig.Y, nu.X, nu.Y, verf);
                 }
+                else
+                {
+                    canvas.DrawCircle(nuX, nuY, rad, verf);
+                }
+            }
+
+            //teken de gebruiker
+            canvas.DrawBitmap(p1, mat2, new Paint());
             
         }
 
