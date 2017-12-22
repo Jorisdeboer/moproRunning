@@ -83,7 +83,21 @@ namespace Running
         //wat gebeurd er als je wil Erasen
         private void B3_Click(object sender, System.EventArgs e)
         {
-            run.Erase();
+          
+            
+            AlertDialog.Builder alert = new AlertDialog.Builder(this);
+            alert.SetTitle("Route echt wissen?");
+            alert.SetNegativeButton("Nee", NietWissen);
+            alert.SetPositiveButton("Ja", WelWissen);
+            alert.Show();
+            void NietWissen(object o, EventArgs ea)
+            {
+            }
+            void WelWissen(object o, EventArgs ea)
+            {
+
+                run.Erase();
+            }
         }
     }
 
@@ -130,7 +144,7 @@ namespace Running
             //centrum vd kaart en de beginpositie van de gebruiker
             centrum = new PointF(139000, 455500);
             plek = new PointF(138300, 454300);
-            rad = Math.Min(p1.Width / 4, p1.Height / 4);
+            rad = Math.Min(p1.Height / 4, p1.Width / 4);
         }
 
         //voor resetten van de view, te gebruiken bij de knop reset
@@ -163,11 +177,8 @@ namespace Running
 
         //om te erasen
         public void Erase()
-        {
-            if (start == false)
-            {
-                    alles.Clear();
-            }
+        {               
+            alles.Clear();
             this.Invalidate();
         }
 
@@ -227,8 +238,8 @@ namespace Running
             
             //teken de kaart
             canvas.DrawBitmap(p, mat, new Paint());
-            
-            //voor de afgelegde track
+	
+	    //voor de afgelegde track
             if(start == true)
             {
                 for(int i = 0; i < alles.Count; i++)
@@ -277,6 +288,30 @@ namespace Running
             }
             //teken de gebruiker
             canvas.DrawBitmap(p1, mat2, new Paint());         
+
+            /*voor de afgelegde track
+
+            foreach(PointF q in alles)
+            {
+                //zet de verf naar de juiste kleur en dikte
+                Paint verf = new Paint();
+                verf.Color = Color.Blue;
+                //omreken van nuX
+                float ax1 = q.X - centrum.X;
+                float px1 = ax1 * 0.4f;
+                float sx1 = px1 * Schaal;
+                float nuX = this.Width / 2 + sx1;
+                //omreken van nuY
+                float ay1 = q.Y - centrum.Y;
+                float py1 = ay1 * 0.4f;
+                float sy1 = py1 * Schaal;
+                float nuY = this.Height / 2 - sy1;
+                    
+                canvas.DrawCircle(nuX, nuY, rad, verf);
+            }*/
+
+            //teken de gebruiker
+            canvas.DrawBitmap(p1, mat2, new Paint());
         }
 
         //voor bepalen van locatie
