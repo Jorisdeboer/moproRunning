@@ -289,30 +289,6 @@ namespace Running
             }
             //teken de gebruiker
             canvas.DrawBitmap(p1, mat2, new Paint());         
-
-            /*voor de afgelegde track
-
-            foreach(PointF q in alles)
-            {
-                //zet de verf naar de juiste kleur en dikte
-                Paint verf = new Paint();
-                verf.Color = Color.Blue;
-                //omreken van nuX
-                float ax1 = q.X - centrum.X;
-                float px1 = ax1 * 0.4f;
-                float sx1 = px1 * Schaal;
-                float nuX = this.Width / 2 + sx1;
-                //omreken van nuY
-                float ay1 = q.Y - centrum.Y;
-                float py1 = ay1 * 0.4f;
-                float sy1 = py1 * Schaal;
-                float nuY = this.Height / 2 - sy1;
-                    
-                canvas.DrawCircle(nuX, nuY, rad, verf);
-            }
-
-            //teken de gebruiker
-            canvas.DrawBitmap(p1, mat2, new Paint());*/
         }
 
         //voor bepalen van locatie
