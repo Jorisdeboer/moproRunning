@@ -140,6 +140,7 @@ namespace Running
         Bitmap p, p1;
         PointF plek, centrum, route;
         List<PointF> alles;
+        List<String> tijdlijst, coordinatenlijst;
         ScaleGestureDetector det;
         GestureDetector det2;
         float Schaal, Hoek, dragx, dragy, midx, midy, spelerX, spelerY, rad;
@@ -336,6 +337,11 @@ namespace Running
             {
                 route = new PointF(plek.X, plek.Y);
                 alles.Add(route);
+                string routestring = route.ToString();
+                coordinatenlijst.Add(routestring);
+                DateTime nu = DateTime.Now;
+                string tijd = nu.ToString("HH:mm:ss");
+                tijdlijst.Add(tijd);
                 this.Invalidate();
             }
         }
