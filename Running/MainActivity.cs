@@ -12,12 +12,10 @@ using static Android.Views.GestureDetector;
 
 namespace Running
 {
-    [ActivityAttribute(Label = "Running", MainLauncher = false)]
+    [Activity(Label = "Running", MainLauncher = true)]
     public class MainActivity : Activity
     {
-        Button b1, b2, b3, b4, b5;
-        TextView text;
-        float size;
+        Button b1, b2, b3, b4;
         RunningView run;
 
         //voor als de app start
@@ -35,31 +33,19 @@ namespace Running
             //de omlijsting van de buttons
             param.SetMargins(10, 0, 10, 20);
 
-            text = new TextView(this);
-            text.Text = "\"nuttig informatie\"";
-            size = 15;
-            
             //alle buttons op een rij
             b1 = new Button(this);
-            b1.TextSize = size;
             b1.Text = "Center";
             b2 = new Button(this);
-            b2.TextSize = size;
             b2.Text = "Start";
             b3 = new Button(this);
-            b3.TextSize = size;
             b3.Text = "Erase";
             b4 = new Button(this);
-            b4.TextSize = 15;
             b4.Text = "Stop";
-            b5 = new Button(this);
-            b5.TextSize = size;
-            b5.Text = "Terug";
             b1.Click += B1_Click;
             b2.Click += B2_Click;
             b3.Click += B3_Click;
             b4.Click += B4_Click;
-            b5.Click += B5_Click;
 
             //layout van de buttons
             layout.Orientation = Orientation.Horizontal;
@@ -67,35 +53,12 @@ namespace Running
             layout.AddView(b2, param);
             layout.AddView(b4, param);
             layout.AddView(b3, param);
-            layout.AddView(b5, param);
             //totale layout
             layout2.Orientation = Orientation.Vertical;
-            layout2.AddView(text);
             layout2.AddView(layout);
             layout2.AddView(run);
             //display de kaart met de buttons erboven (layout2)
             SetContentView(layout2);
-        }
-
-        //Gaat terug naar de hoofdactivity
-        private void B5_Click(object sender, EventArgs e)
-        {
-            AlertDialog.Builder d;
-            d = new AlertDialog.Builder(this);
-            d.SetTitle("Weet je zeker dat je terug wilt naar het hoofdmenu?");
-            d.SetPositiveButton("ja", Ja);
-            d.SetNegativeButton("nee", Nee);
-            d.Show();
-
-            void Ja(object o, EventArgs ea)
-            {
-                Intent i;
-                i = new Intent(this, typeof(Multiclass));
-                StartActivity(i);
-            }
-
-            void Nee(object o, EventArgs ea)
-            { }
         }
 
         //wat gebeurd er als je de kaart moet centreren
