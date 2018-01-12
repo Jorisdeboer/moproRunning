@@ -38,7 +38,7 @@ namespace Running
             text = new TextView(this);
             text.Text = "\"nuttig informatie\"";
             size = 15;
-            
+
             //alle buttons op een rij
             b1 = new Button(this);
             b1.TextSize = size;
@@ -106,7 +106,7 @@ namespace Running
 
         //wat gebeurd er als je gaat starten
         private void B2_Click(object sender, System.EventArgs e)
-        {            
+        {
             run.Starting();
         }
 
