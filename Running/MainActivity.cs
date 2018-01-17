@@ -18,7 +18,7 @@ namespace Running
         Button b1, b2, b3, b4, b5;
         TextView text;
         float size;
-        RunningView run;
+        public static RunningView run;
 
         //voor als de app start
         protected override void OnCreate(Bundle b)
@@ -139,15 +139,14 @@ namespace Running
         Matrix mat, mat2;
         Bitmap p, p1;
         PointF plek, centrum, route;
-        List<PointF> alles;
-        List<String> tijdlijst, coordinatenlijst;
+        public List<PuntEnTijd> lijst;
         ScaleGestureDetector det;
         GestureDetector det2;
         float Schaal, Hoek, dragx, dragy, midx, midy, spelerX, spelerY, rad;
         bool pinching = false;
         public bool start = false;
         public bool stop = false;
-
+        string routestring;
 
         //initialiseer de eigen view
         public RunningView(Context c) : base(c)
@@ -175,7 +174,7 @@ namespace Running
             crit.Accuracy = Accuracy.Fine;
             string lp = lm.GetBestProvider(crit, true);
             //positie wordt geupdate elke 500 ms en bij een verandering 
-            lm.RequestLocationUpdates(lp, 500, 0.5f, this);
+            lm.RequestLocationUpdates(lp, 1000, 0.5f, this);
 
             //beginwaardes declareren
             centrum = new PointF(139000, 455500);
@@ -200,7 +199,7 @@ namespace Running
         {
             if (start == false)
             {
-                alles = new List<PointF>();
+                lijst = new List<PuntEnTijd>();
                 start = true;
                 this.Invalidate();
             }
@@ -219,7 +218,7 @@ namespace Running
         //om te erasen
         public void Erase()
         {
-            alles.Clear();
+            lijst.Clear();
             this.Invalidate();
         }
 
@@ -230,7 +229,7 @@ namespace Running
 
             if (Schaal == 0)
                 Schaal = Math.Min(((float)this.Width) / this.p.Width, ((float)this.Height) / this.p.Height);
-            
+
             midx = (centrum.X - 136000) * 0.4f;
             midy = -(centrum.Y - 458000) * 0.4f;
 
@@ -247,7 +246,7 @@ namespace Running
             spelerY = this.Height / 2 - sy;
 
             //voor kaart zelf
-            mat = new Matrix();        
+            mat = new Matrix();
             mat.PostTranslate(-midx, -midy);
 
             //Borders voor schalen
@@ -257,31 +256,31 @@ namespace Running
             }
             if (Schaal < Math.Min(((float)this.Width) / this.p.Width, ((float)this.Height) / this.p.Height))
             {
-                 Schaal = Math.Min(((float)this.Width) / this.p.Width, ((float)this.Height) / this.p.Height);
+                Schaal = Math.Min(((float)this.Width) / this.p.Width, ((float)this.Height) / this.p.Height);
             }
             mat.PostScale(this.Schaal, this.Schaal);
 
             //Borders voor draggen
-            centrum.X = Math.Max(centrum.X, 136000 + ((this.Width / 2)/ Schaal / 0.4f));
+            centrum.X = Math.Max(centrum.X, 136000 + ((this.Width / 2) / Schaal / 0.4f));
             centrum.X = Math.Min(centrum.X, 142000 - ((this.Width / 2) / Schaal / 0.4f));
             centrum.Y = Math.Min(centrum.Y, 458000 - ((this.Height / 2) / Schaal / 0.4f));
             centrum.Y = Math.Max(centrum.Y, 453000 + ((this.Height / 2) / Schaal / 0.4f));
 
-            mat.PostTranslate(this.Width / 2, this.Height / 2);           
+            mat.PostTranslate(this.Width / 2, this.Height / 2);
 
             //voor de gebruiker
             mat2 = new Matrix();
             mat2.PostTranslate(-this.p1.Width / 2, -this.p1.Height / 2);
             mat2.PostRotate(-this.Hoek);
             mat2.PostTranslate(spelerX, spelerY);
-            
+
             //teken de kaart
             canvas.DrawBitmap(p, mat, new Paint());
-	
-	        //teken de afgelegde track
-            if(alles != null)
+
+            //teken de afgelegde track
+            if (lijst != null)
             {
-                for(int i = 0; i < alles.Count; i++)
+                for (int i = 0; i < lijst.Count; i++)
                 {
                     PointF vorig, nu;
                     //zet de verf naar de juiste kleur en dikte
@@ -290,25 +289,25 @@ namespace Running
                     verf.StrokeWidth = rad;
 
                     //omreken van nuX
-                    float ax1 = alles[i].X - centrum.X;
+                    float ax1 = lijst[i].punt.X - centrum.X;
                     float px1 = ax1 * 0.4f;
                     float sx1 = px1 * Schaal;
                     float nuX = this.Width / 2 + sx1;
                     //omreken van nuY
-                    float ay1 = alles[i].Y - centrum.Y;
+                    float ay1 = lijst[i].punt.Y - centrum.Y;
                     float py1 = ay1 * 0.4f;
                     float sy1 = py1 * Schaal;
                     float nuY = this.Height / 2 - sy1;
 
-                    if(i-1 >= 0)
+                    if (i - 1 >= 0)
                     {
                         //omreken van vorigX
-                        float ax2 = alles[i-1].X - centrum.X;
+                        float ax2 = lijst[i - 1].punt.X - centrum.X;
                         float px2 = ax2 * 0.4f;
                         float sx2 = px2 * Schaal;
                         float vorigX = this.Width / 2 + sx2;
                         //omreken van vorigY
-                        float ay2 = alles[i-1].Y - centrum.Y;
+                        float ay2 = lijst[i - 1].punt.Y - centrum.Y;
                         float py2 = ay2 * 0.4f;
                         float sy2 = py2 * Schaal;
                         float vorigY = this.Height / 2 - sy2;
@@ -326,22 +325,19 @@ namespace Running
                 }
             }
             //teken de gebruiker
-            canvas.DrawBitmap(p1, mat2, new Paint());         
+            canvas.DrawBitmap(p1, mat2, new Paint());
         }
 
         //voor bepalen van locatie
         public void OnLocationChanged(Location loc)
         {
             plek = Projectie.Geo2RD(loc);
-             if (start == true)
+            if (start == true)
             {
                 route = new PointF(plek.X, plek.Y);
-                alles.Add(route);
-                string routestring = route.ToString();
-                coordinatenlijst.Add(routestring);
                 DateTime nu = DateTime.Now;
-                string tijd = nu.ToString("HH:mm:ss");
-                tijdlijst.Add(tijd);
+                PuntEnTijd pt = new PuntEnTijd(route, nu);
+                lijst.Add(pt);
                 this.Invalidate();
             }
         }
@@ -349,8 +345,8 @@ namespace Running
         //voor orientation naar het noorden
         public void OnSensorChanged(SensorEvent s)
         {
-            if(s.Sensor.Type == SensorType.Orientation)
-            Hoek = s.Values[0];
+            if (s.Sensor.Type == SensorType.Orientation)
+                Hoek = s.Values[0];
             this.Invalidate();
         }
 
@@ -358,7 +354,7 @@ namespace Running
         private void raakAan(object sender, TouchEventArgs e)
         {
             det.OnTouchEvent(e.Event);
-            if(e.Event.Action == MotionEventActions.Pointer2Down && e.Event.Action == MotionEventActions.Pointer1Down)
+            if (e.Event.Action == MotionEventActions.Pointer2Down && e.Event.Action == MotionEventActions.Pointer1Down)
             {
                 pinching = true;
             }
@@ -382,12 +378,12 @@ namespace Running
         public bool OnScroll(MotionEvent m1, MotionEvent m2, float x, float y)
         {
             dragx = (x / Schaal) / 0.4f;
-            dragy = (y / Schaal) / 0.4f; 
+            dragy = (y / Schaal) / 0.4f;
             centrum = new PointF(centrum.X + dragx, centrum.Y - dragy);
             this.Invalidate();
             return true;
         }
-            
+
 
         //BEGIN VAN OVERIG
         //overige methodes die we niet hoeven te gebruiken
@@ -411,7 +407,7 @@ namespace Running
         {
             return true;
         }
-        
+
         public bool OnDown(MotionEvent me)
         {
             return true;
@@ -432,5 +428,23 @@ namespace Running
         public void OnAccuracyChanged(Sensor s, SensorStatus ss)
         { }
         //EIND VAN OVERIGE METHODE, WEL LATEN STAAN
+    }
+
+    public class PuntEnTijd
+    {
+        public PointF punt;
+        public DateTime tijd;
+
+        public PuntEnTijd(PointF p, DateTime dt)
+        {
+            punt = p;
+            tijd = dt;
+        }
+
+        public override string ToString()
+        {
+            string s = $"{punt}, {tijd}";
+            return s;
+        }
     }
 }
