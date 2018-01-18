@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 using Android.App;
 using Android.Content;
 using Android.Graphics;
@@ -18,6 +14,7 @@ namespace Running
     {
         Button b1, share;
         public TextView txt;
+        string bericht;
 
         protected override void OnCreate(Bundle b)
         {
@@ -31,6 +28,8 @@ namespace Running
             int linkerdeel = schermbreedte * (7 / 8);
             //de omlijsting van de buttons
             param.SetMargins(linkerdeel, 0, 0, 0);
+
+            bericht = "| coordinaten | tijd | snelheid |";
 
             b1 = new Button(this);
             b1.Text = "Terug naar het hoofdmenu";
@@ -58,8 +57,14 @@ namespace Running
 
         private void Sharing(object sender, EventArgs e)
         {
-            string bericht;
-            bericht = "Dit zijn de gegevens van mijn run: " + txt.Text + "\n Kan jij dit verbeteren?";
+            //eerst grootte van lijst bepalen
+            int a = MainActivity.run.lijst.Count;
+            //loopje over de hele lijst, zodat alle elementen in het bericht komen
+            for(int i = 0; i < a; i++)
+            {
+                
+            }
+            bericht += "\n Dit zijn de gegevens van mijn run, \n Kan jij dit verbeteren?";
 
             AlertDialog.Builder d;
             d = new AlertDialog.Builder(this);
