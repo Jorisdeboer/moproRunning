@@ -14,6 +14,7 @@ namespace Running
     {
         Button b1, share;
         public TextView txt;
+        public int nummer;
         public static string bericht;
 
         protected override void OnCreate(Bundle b)
@@ -28,7 +29,7 @@ namespace Running
             int linkerdeel = schermbreedte * (7 / 8);
             //de omlijsting van de buttons
             param.SetMargins(linkerdeel, 0, 0, 0);
-
+            nummer = 1;
             bericht = "| coordinaten | tijd | snelheid |";
 
             b1 = new Button(this);
@@ -60,7 +61,8 @@ namespace Running
             //loopje over de hele lijst, zodat alle elementen in het bericht komen
             foreach(PuntEnTijd pt in MainActivity.run.lijst)
             {
-                bericht += $"\n {pt.info}";
+                bericht += $"\n{nummer} | {pt.info}";
+                nummer++;
             }
             bericht += "\n Dit zijn de gegevens van mijn run, \n Kan jij dit verbeteren?";
 
@@ -83,14 +85,9 @@ namespace Running
 
             void laatZien(object o, EventArgs ea)
             {
-                AlertDialog.Builder ad;
-                ad = new AlertDialog.Builder(this);
-                ad.SetTitle(bericht);
-                ad.SetNeutralButton("ok", OK);
-                ad.Show();
-
-                void OK(object ob, EventArgs eas)
-                { }
+                Intent i;
+                i = new Intent(this, typeof(AnalysisDisplay));
+                StartActivity(i);
             }
 
             void Niks(object o, EventArgs ea)

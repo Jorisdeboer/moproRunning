@@ -439,14 +439,8 @@ namespace Running
         public PuntEnTijd(PointF p, DateTime dt)
         {
             punt = new PointF(p.X, p.Y);
-            tijd = new DateTime(dt.Year, dt.Month, dt.Day);
-            info = $"{punt}, {tijd}";
-        }
-
-        public override string ToString()
-        {
-            string s = $"{punt}, {tijd}";
-            return s;
+            tijd = new DateTime(dt.Hour, dt.Minute, dt.Second);
+            info = $"({punt.X},{punt.Y}), {tijd}";
         }
     }
 }
