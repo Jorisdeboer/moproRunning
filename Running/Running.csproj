@@ -54,6 +54,7 @@
     <Reference Include="Mono.Android" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AnalysisDisplay.cs" />
     <Compile Include="Class1.cs" />
     <Compile Include="MainActivity.cs" />
     <Compile Include="Multiclass.cs" />

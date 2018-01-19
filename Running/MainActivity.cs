@@ -434,11 +434,13 @@ namespace Running
     {
         public PointF punt;
         public DateTime tijd;
+        public string info;
 
         public PuntEnTijd(PointF p, DateTime dt)
         {
-            punt = p;
-            tijd = dt;
+            punt = new PointF(p.X, p.Y);
+            tijd = new DateTime(dt.Year, dt.Month, dt.Day);
+            info = $"{punt}, {tijd}";
         }
 
         public override string ToString()

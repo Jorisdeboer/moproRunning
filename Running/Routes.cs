@@ -14,13 +14,13 @@ namespace Running
     {
         Button b1, share;
         public TextView txt;
-        string bericht;
+        public static string bericht;
 
         protected override void OnCreate(Bundle b)
         {
             base.OnCreate(b);
             txt = new TextView(this);
-            txt.Text = "testroute";
+            txt.Text = "Route 1";
 
             LinearLayout.LayoutParams param;
             param = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent, 0.25f);
@@ -57,12 +57,10 @@ namespace Running
 
         private void Sharing(object sender, EventArgs e)
         {
-            //eerst grootte van lijst bepalen
-            int a = MainActivity.run.lijst.Count;
             //loopje over de hele lijst, zodat alle elementen in het bericht komen
-            for(int i = 0; i < a; i++)
+            foreach(PuntEnTijd pt in MainActivity.run.lijst)
             {
-                
+                bericht += $"\n {pt.info}";
             }
             bericht += "\n Dit zijn de gegevens van mijn run, \n Kan jij dit verbeteren?";
 
