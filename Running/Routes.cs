@@ -14,13 +14,14 @@ namespace Running
     {
         Button b1, share;
         public TextView txt;
-        string bericht;
+        public int nummer;
+        public static string bericht;
 
         protected override void OnCreate(Bundle b)
         {
             base.OnCreate(b);
             txt = new TextView(this);
-            txt.Text = "testroute";
+            txt.Text = "Route 1";
 
             LinearLayout.LayoutParams param;
             param = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent, 0.25f);
@@ -28,7 +29,7 @@ namespace Running
             int linkerdeel = schermbreedte * (7 / 8);
             //de omlijsting van de buttons
             param.SetMargins(linkerdeel, 0, 0, 0);
-
+            nummer = 1;
             bericht = "| coordinaten | tijd | snelheid |";
 
             b1 = new Button(this);
@@ -57,12 +58,11 @@ namespace Running
 
         private void Sharing(object sender, EventArgs e)
         {
-            //eerst grootte van lijst bepalen
-            int a = MainActivity.run.lijst.Count;
             //loopje over de hele lijst, zodat alle elementen in het bericht komen
-            for(int i = 0; i < a; i++)
+            foreach(PuntEnTijd pt in MainActivity.run.lijst)
             {
-                
+                bericht += $"\n{nummer} | {pt.info}";
+                nummer++;
             }
             bericht += "\n Dit zijn de gegevens van mijn run, \n Kan jij dit verbeteren?";
 
@@ -85,14 +85,9 @@ namespace Running
 
             void laatZien(object o, EventArgs ea)
             {
-                AlertDialog.Builder ad;
-                ad = new AlertDialog.Builder(this);
-                ad.SetTitle(bericht);
-                ad.SetNeutralButton("ok", OK);
-                ad.Show();
-
-                void OK(object ob, EventArgs eas)
-                { }
+                Intent i;
+                i = new Intent(this, typeof(AnalysisDisplay));
+                StartActivity(i);
             }
 
             void Niks(object o, EventArgs ea)
