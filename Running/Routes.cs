@@ -12,7 +12,7 @@ namespace Running
     [ActivityAttribute(Label = "Running", MainLauncher = false)]
     class Routes : Activity
     {
-        Button b1, share;
+        public static Button b1, share, analyze;
         public TextView txt;
         public int nummer;
         public static string bericht;
@@ -21,23 +21,28 @@ namespace Running
         {
             base.OnCreate(b);
             txt = new TextView(this);
-            txt.Text = "Route 1";
+            txt.Text = "Fake Track";
 
             LinearLayout.LayoutParams param;
             param = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent, 0.25f);
-            int schermbreedte = Resources.DisplayMetrics.WidthPixels;
-            int linkerdeel = schermbreedte * (7 / 8);
             //de omlijsting van de buttons
-            param.SetMargins(linkerdeel, 0, 0, 0);
+            param.SetMargins(5, 0, 5, 0);
             nummer = 1;
-            bericht = "| coordinaten | tijd | snelheid |";
+            bericht = "| coordinaten | tijd |";
 
+            //de buttons van deze pagina
             b1 = new Button(this);
             b1.Text = "Terug naar het hoofdmenu";
             b1.Click += B1_Click;
             share = new Button(this);
             share.Text = "Share";
             share.Click += Sharing;
+            share.Visibility = ViewStates.Invisible;
+
+            analyze = new Button(this);
+            analyze.Text = "Analyzeer";
+            analyze.Click += Analyze;
+            analyze.Visibility = ViewStates.Invisible;
 
             LinearLayout layout;
             layout = new LinearLayout(this);
@@ -49,6 +54,7 @@ namespace Running
 
             routelayout.AddView(txt);
             routelayout.AddView(share, param);
+            routelayout.AddView(analyze, param);
 
             layout.AddView(b1);
             layout.AddView(routelayout);
@@ -56,16 +62,24 @@ namespace Running
             this.SetContentView(layout);
         }
 
+        private void Analyze(object sender, EventArgs e)
+        {
+            Intent i;
+            i = new Intent(this, typeof(AnalyseActivity));
+            StartActivity(i);
+        }
+
         private void Sharing(object sender, EventArgs e)
         {
-            //loopje over de hele lijst, zodat alle elementen in het bericht komen
-            foreach(PuntEnTijd pt in MainActivity.run.lijst)
+            //loop over de hele lijst, zodat alle elementen in het bericht komen
+            foreach (PuntEnTijd pt in MainActivity.run.lijst)
             {
                 bericht += $"\n{nummer} | {pt.info}";
                 nummer++;
             }
             bericht += "\n Dit zijn de gegevens van mijn run, \n Kan jij dit verbeteren?";
 
+            //info om de track te kunnen sharen
             AlertDialog.Builder d;
             d = new AlertDialog.Builder(this);
             d.SetTitle("Weet je zeker dat je deze track wilt sharen?");
@@ -74,6 +88,7 @@ namespace Running
             d.SetNegativeButton("nee", Niks);
             d.Show();
 
+            //verzend de track
             void Zenden(object o, EventArgs ea)
             {
                 Intent i;
@@ -83,6 +98,7 @@ namespace Running
                 this.StartActivity(i);
             }
 
+            //ga naar de analyse pagina
             void laatZien(object o, EventArgs ea)
             {
                 Intent i;

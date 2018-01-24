@@ -146,7 +146,6 @@ namespace Running
         bool pinching = false;
         public bool start = false;
         public bool stop = false;
-        string routestring;
 
         //initialiseer de eigen view
         public RunningView(Context c) : base(c)
@@ -174,7 +173,7 @@ namespace Running
             crit.Accuracy = Accuracy.Fine;
             string lp = lm.GetBestProvider(crit, true);
             //positie wordt geupdate elke 500 ms en bij een verandering 
-            lm.RequestLocationUpdates(lp, 1000, 0.5f, this);
+            lm.RequestLocationUpdates(lp, 1000, 0, this);
 
             //beginwaardes declareren
             centrum = new PointF(139000, 455500);
@@ -201,6 +200,9 @@ namespace Running
             {
                 lijst = new List<PuntEnTijd>();
                 start = true;
+                Routes.share.Visibility = ViewStates.Visible;
+                Routes.analyze.Visibility = ViewStates.Visible;
+
                 this.Invalidate();
             }
         }
@@ -219,6 +221,8 @@ namespace Running
         public void Erase()
         {
             lijst.Clear();
+            Routes.analyze.Visibility = ViewStates.Invisible;
+            Routes.share.Visibility = ViewStates.Invisible;
             this.Invalidate();
         }
 
@@ -439,8 +443,8 @@ namespace Running
         public PuntEnTijd(PointF p, DateTime dt)
         {
             punt = new PointF(p.X, p.Y);
-            tijd = new DateTime(dt.Hour, dt.Minute, dt.Second);
-            info = $"({punt.X},{punt.Y}), {tijd}";
+            tijd = new DateTime();
+            info = $"({punt.X},{punt.Y}), {tijd.ToString("HH:mm:ss")}";
         }
     }
 }
