@@ -16,8 +16,7 @@ namespace Running
     [ActivityAttribute(Label = "Running", MainLauncher = false)]
     public class MainActivity : Activity
     {
-        Button b1, b2, b3, b4, b5;
-        TextView text;
+        Button b1, b2, b3, b4, b5, b6, b7;
         float size;
         public static RunningView run;
 
@@ -28,16 +27,17 @@ namespace Running
             //initialiseer alle layouts etc.
             LinearLayout layout;
             layout = new LinearLayout(this);
+            LinearLayout layout3;
+            layout3 = new LinearLayout(this);         
             LinearLayout layout2;
             layout2 = new LinearLayout(this);
             run = new RunningView(this);
             LinearLayout.LayoutParams param;
             param = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent, 0.25f);
+            LinearLayout.LayoutParams paramrun;
+            paramrun = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent, 0.75f);
             //de omlijsting van de buttons
-            param.SetMargins(10, 0, 10, 20);
-
-            text = new TextView(this);
-            text.Text = "\"nuttig informatie\"";
+            param.SetMargins(2, 0, 2, 20);
             size = 15;
 
             //alle buttons op een rij
@@ -49,18 +49,27 @@ namespace Running
             b2.Text = "Start";
             b3 = new Button(this);
             b3.TextSize = size;
-            b3.Text = "Erase";
+            b3.Text = "Wissen";
             b4 = new Button(this);
             b4.TextSize = 15;
             b4.Text = "Stop";
             b5 = new Button(this);
             b5.TextSize = size;
-            b5.Text = "Laden";
+            b5.Text = "Fake track";
+            b6 = new Button(this);
+            b6.TextSize = size;
+            b6.Text = "Delen";
+            b7 = new Button(this);
+            b7.TextSize = size;
+            b7.Text = "Analyseer";
+
             b1.Click += B1_Click;
             b2.Click += B2_Click;
             b3.Click += B3_Click;
             b4.Click += B4_Click;
             b5.Click += Laden;
+            b6.Click += Sharing;
+            b7.Click += Analyseer;
 
             //layout van de buttons
             layout.Orientation = Orientation.Horizontal;
@@ -68,36 +77,42 @@ namespace Running
             layout.AddView(b2, param);
             layout.AddView(b4, param);
             layout.AddView(b3, param);
-            layout.AddView(b5, param);
+
+            //layout buttons onder de map
+            layout3.Orientation = Orientation.Horizontal;
+            layout3.AddView(b5, param);
+            layout3.AddView(b6, param);
+            layout3.AddView(b7, param);
+
             //totale layout
             layout2.Orientation = Orientation.Vertical;
-            layout2.AddView(text);
             layout2.AddView(layout);
-            layout2.AddView(run);
+            layout2.AddView(run, paramrun);
+            layout2.AddView(layout3);
             //display de kaart met de buttons erboven (layout2)
             SetContentView(layout2);
         }
 
 
-        //wat gebeurd er als je de kaart moet centreren
+        //wat gebeurt er als je de kaart moet centreren
         private void B1_Click(object sender, System.EventArgs e)
         {
             run.Reset();
         }
 
-        //wat gebeurd er als je gaat starten
+        //wat gebeurt er als je gaat starten
         private void B2_Click(object sender, System.EventArgs e)
         {
             run.Starting();
         }
 
-        //wat gebeurd er als je op stoppen klikt
+        //wat gebeurt er als je op stoppen klikt
         private void B4_Click(object sender, System.EventArgs e)
         {
             run.Stopping();
         }
 
-        //wat gebeurd er als je wil Erasen
+        //wat gebeurt er als je wil Erasen
         private void B3_Click(object sender, System.EventArgs e)
         {
             //voor de vraag om te wissen
@@ -112,6 +127,11 @@ namespace Running
             {
                 run.Erase();
             }
+        }
+        //Start Analyseren
+        private void Analyseer(object sender, System.EventArgs e)
+        {
+            
         }
         //Laden van faketrack
         public void Laden(object sender, EventArgs e)
@@ -145,6 +165,39 @@ namespace Running
                 }
             }
             run.Invalidate();
+        }
+        private void Sharing(object sender, EventArgs e)
+        {
+
+            AlertDialog.Builder d;
+            d = new AlertDialog.Builder(this);
+            d.SetTitle("Weet je zeker dat je deze track wilt delen?");
+            d.SetPositiveButton("Ja", Zenden);
+            d.SetNegativeButton("Nee", Niks);
+            d.Show();
+
+            void Zenden(object o, EventArgs ea)
+            {
+                Intent i;
+                i = new Intent(Intent.ActionSend);
+                i.SetType("text/plain");
+                i.PutExtra(Intent.ExtraText, MaakBericht());
+                this.StartActivity(i);
+            }
+
+
+            void Niks(object o, EventArgs ea)
+            { }
+        }
+        //hier wordt een string gemaakt met alle coordinaten en hun tijd, die gebruikt kan worden voor share en voor save
+        public static string MaakBericht()
+        {
+            string bericht = "";
+            foreach (PuntEnTijd pt in MainActivity.run.lijst)
+            {
+                bericht += $"{pt.info}\n";
+            }
+            return bericht;
         }
     }
 
