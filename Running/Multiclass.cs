@@ -9,6 +9,7 @@ namespace Running
     [Activity(Label = "Running", MainLauncher = true)]
     class Multiclass : Activity
     {
+
         Button b1, b2;
 
         protected override void OnCreate(Bundle b)
@@ -35,7 +36,6 @@ namespace Running
 
             this.SetContentView(layout);
         }
-
 
         private void clicked(object sender, EventArgs e)
         {

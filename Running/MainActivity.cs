@@ -138,12 +138,12 @@ namespace Running
         //Start Analyseren
         private void Analyseer(object sender, System.EventArgs e)
         {
-
+            Intent i = new Intent(this, typeof(AnalyseActivity));
+            StartActivity(i);
         }
         //Laden van faketrack
         public void Laden(object sender, EventArgs e)
         {
-
             string content;
             using (StreamReader sr = new StreamReader(this.Assets.Open("faketrack.txt")))
             {
@@ -181,6 +181,7 @@ namespace Running
             d.SetTitle("Weet je zeker dat je deze track wilt delen?");
             d.SetPositiveButton("Ja", Zenden);
             d.SetNegativeButton("Nee", Niks);
+            d.SetNeutralButton("Show", laatZien);
             d.Show();
 
             void Zenden(object o, EventArgs ea)
@@ -188,11 +189,17 @@ namespace Running
                 Intent i;
                 i = new Intent(Intent.ActionSend);
                 i.SetType("text/plain");
-                i.PutExtra(Intent.ExtraText, MaakBericht());
+                i.PutExtra(Intent.ExtraText, AnalysisDisplay.deelbaarBericht);
                 this.StartActivity(i);
             }
             void Niks(object o, EventArgs ea)
             { }
+
+            void laatZien(object o, EventArgs ea)
+            {
+                Intent i = new Intent(this, typeof(AnalysisDisplay));
+                StartActivity(i);
+            }
         }
         //hier wordt een string gemaakt met alle coordinaten en hun tijd, die gebruikt kan worden voor share en voor save
         public static string MaakBericht()
@@ -239,7 +246,6 @@ namespace Running
         public bool start = false;
         public bool stop = false;
 
-
         //initialiseer de eigen view
         public RunningView(Context c) : base(c)
 
@@ -267,7 +273,7 @@ namespace Running
             crit.Accuracy = Accuracy.Fine;
             string lp = lm.GetBestProvider(crit, true);
             //positie wordt geupdate elke 500 ms en bij een verandering 
-            lm.RequestLocationUpdates(lp, 1000, 0.5f, this);
+            lm.RequestLocationUpdates(lp, 1000, 0, this);
 
             //beginwaardes declareren
             centrum = new PointF(139000, 455500);
@@ -534,7 +540,7 @@ namespace Running
         public PuntEnTijd(PointF p, DateTime dt)
         {
             punt = new PointF(p.X, p.Y);
-            tijd = dt;
+	    tijd = dt;
             info = $"{punt.X} {punt.Y} {tijd.ToString("yyyy MM dd HH mm ss")}";
         }
     }
