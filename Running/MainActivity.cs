@@ -133,7 +133,8 @@ namespace Running
         //Start Analyseren
         private void Analyseer(object sender, System.EventArgs e)
         {
-
+            Intent i = new Intent(this, typeof(AnalyseActivity));
+            StartActivity(i);
         }
         //Laden van faketrack
         public void Laden(object sender, EventArgs e)
@@ -170,12 +171,12 @@ namespace Running
         }
         private void Sharing(object sender, EventArgs e)
         {
-
             AlertDialog.Builder d;
             d = new AlertDialog.Builder(this);
             d.SetTitle("Weet je zeker dat je deze track wilt delen?");
             d.SetPositiveButton("Ja", Zenden);
             d.SetNegativeButton("Nee", Niks);
+            d.SetNeutralButton("Show", laatZien);
             d.Show();
 
             void Zenden(object o, EventArgs ea)
@@ -188,6 +189,12 @@ namespace Running
             }
             void Niks(object o, EventArgs ea)
             { }
+
+            void laatZien(object o, EventArgs ea)
+            {
+                Intent i = new Intent(this, typeof(AnalysisDisplay));
+                StartActivity(i);
+            }
         }
         //hier wordt een string gemaakt met alle coordinaten en hun tijd, die gebruikt kan worden voor share en voor save
         public static string MaakBericht()
@@ -268,9 +275,6 @@ namespace Running
             {
                 lijst = new List<PuntEnTijd>();
                 start = true;
-                Routes.share.Visibility = ViewStates.Visible;
-                Routes.analyze.Visibility = ViewStates.Visible;
-
                 this.Invalidate();
             }
         }
@@ -289,8 +293,6 @@ namespace Running
         public void Erase()
         {
             lijst.Clear();
-            Routes.analyze.Visibility = ViewStates.Invisible;
-            Routes.share.Visibility = ViewStates.Invisible;
             this.Invalidate();
         }
 

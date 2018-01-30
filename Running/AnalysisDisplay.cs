@@ -17,16 +17,16 @@ namespace Running
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
-
+            string deelbaarBericht = "";
             text = new TextView(this);
-	    text.Text = Routes.MaakBericht();
-            Button b = new Button(this);
+            //deelbaarBericht moet je de highlights aan toevoegen (maxsnelheid, gelopen afstand, gelopen tijd + wat info om het 'menselijk' te maken
+            text.Text = deelbaarBericht;
             LinearLayout layout = new LinearLayout(this);
             layout.Orientation = Orientation.Vertical;
 
             Button b = new Button(this);
             b.Click += B_Click;
-            b.Text = "Terug naar Mijn Routes";
+            b.Text = "Terug";
 
             layout.AddView(text);
             layout.AddView(b);
@@ -38,7 +38,7 @@ namespace Running
         private void B_Click(object sender, EventArgs e)
         {
             Intent i;
-            i = new Intent(this, typeof(Routes));
+            i = new Intent(this, typeof(MainActivity));
             StartActivity(i);
         }
     }
