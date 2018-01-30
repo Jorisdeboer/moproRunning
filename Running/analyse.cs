@@ -110,7 +110,7 @@ namespace Running
 
             //info over binnenlijnen - verticaal
             verf.Color = Color.Red;
-            verf.StrokeWidth = 3;
+            verf.StrokeWidth = 2;
             verf.TextSize = 20;
             if (maxtijd > 0f)
             {
@@ -127,9 +127,6 @@ namespace Running
             }
 
             //info over binnelijnen - horizontaal
-            verf.Color = Color.Red;
-            verf.StrokeWidth = 3;
-            verf.TextSize = 20;
             if (maxsnelheid > 0)
             {
                 float stapgrootte = Math.Max((grafiekafstand / maxsnelheid), (grafiekafstand/6));
@@ -154,11 +151,14 @@ namespace Running
             cv.DrawText("snelheid (m/s)", (graphx - 40), (this.Height - grafiekafstand - 20), verf);
             cv.DrawText("tijd (sec)", (grafiekbreedte + 20), (graphy + 20), verf);
 
+            verf.Color = Color.Green;
+            verf.StrokeWidth = 4;
             //for-loop om een lijn te tekenen tussen vorige punt en nieuwe punt.
             for (int i = 0; i < grafiekbreedte; i++)
             {
-                
+                cv.DrawLine(graphx + tijden[i], graphy - snelheden[i], graphx + tijden[i + 1], graphy - snelheden[i + 1], verf);
             }
+            cv.DrawLine(graphx + tijden.ElementAt(tijden.Length - 1), graphy - snelheden.ElementAt(snelheden.Length - 1), graphx + tijden.Last(), graphy - snelheden.Last(), verf);
         }
 
         //bepaal het verschil in seconden tussen twee tijden

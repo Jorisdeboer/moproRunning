@@ -38,7 +38,7 @@ namespace Running
             paramrun = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent, 0.75f);
             //de omlijsting van de buttons
             param.SetMargins(2, 0, 2, 20);
-            size = 15;
+            size = 12;
 
             //alle buttons op een rij
             b1 = new Button(this);

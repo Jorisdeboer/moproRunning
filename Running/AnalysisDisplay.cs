@@ -14,6 +14,7 @@ namespace Running
     {
         public TextView text;
         public static string deelbaarBericht;
+
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
