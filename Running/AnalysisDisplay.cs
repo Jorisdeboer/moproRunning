@@ -20,7 +20,7 @@ namespace Running
         {
             base.OnCreate(savedInstanceState);
             text = new TextView(this);
-            text.Text = Routes.bericht;
+            text.Text = Routes.MaakBericht();
             Button b = new Button(this);
             LinearLayout layout = new LinearLayout(this);
             layout.Orientation = Orientation.Vertical;
