@@ -14,8 +14,7 @@ namespace Running
     {
         public static Button b1, share, analyze;
         public TextView txt;
-        public int nummer;
-        public static string bericht;
+        string bericht;
 
         protected override void OnCreate(Bundle b)
         {
@@ -27,8 +26,7 @@ namespace Running
             param = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent, 0.25f);
             //de omlijsting van de buttons
             param.SetMargins(5, 0, 5, 0);
-            nummer = 1;
-            bericht = "| coordinaten | tijd |";
+            bericht = "";
 
             //de buttons van deze pagina
             b1 = new Button(this);
@@ -37,19 +35,16 @@ namespace Running
             share = new Button(this);
             share.Text = "Share";
             share.Click += Sharing;
-            share.Visibility = ViewStates.Invisible;
 
             analyze = new Button(this);
             analyze.Text = "Analyzeer";
             analyze.Click += Analyze;
-            analyze.Visibility = ViewStates.Invisible;
 
             LinearLayout layout;
             layout = new LinearLayout(this);
             layout.Orientation = Orientation.Vertical;
 
-            LinearLayout routelayout;
-            routelayout = new LinearLayout(this);
+            LinearLayout routelayout = new LinearLayout(this);
             routelayout.Orientation = Orientation.Horizontal;
 
             routelayout.AddView(txt);
@@ -74,10 +69,8 @@ namespace Running
             //loop over de hele lijst, zodat alle elementen in het bericht komen
             foreach (PuntEnTijd pt in MainActivity.run.lijst)
             {
-                bericht += $"\n{nummer} | {pt.info}";
-                nummer++;
+                bericht += $" {pt.info} \n"; 
             }
-            bericht += "\n Dit zijn de gegevens van mijn run, \n Kan jij dit verbeteren?";
 
             //info om de track te kunnen sharen
             AlertDialog.Builder d;
