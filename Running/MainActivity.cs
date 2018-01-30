@@ -16,7 +16,7 @@ namespace Running
     [ActivityAttribute(Label = "Running", MainLauncher = false)]
     public class MainActivity : Activity
     {
-        Button b1, b2, b3, b4, b5, b6, b7;
+        Button b1, b2, b3, b4, b5, b6, b7, b8;
         float size;
         public static RunningView run;
 
@@ -62,6 +62,9 @@ namespace Running
             b7 = new Button(this);
             b7.TextSize = size;
             b7.Text = "Analyseer";
+            b8 = new Button(this);
+            b8.TextSize = size;
+            b8.Text = "Hoofdmenu";
 
             b1.Click += B1_Click;
             b2.Click += B2_Click;
@@ -70,6 +73,7 @@ namespace Running
             b5.Click += Laden;
             b6.Click += Sharing;
             b7.Click += Analyseer;
+            b8.Click += Terug;
 
             //layout van de buttons
             layout.Orientation = Orientation.Horizontal;
@@ -83,6 +87,7 @@ namespace Running
             layout3.AddView(b5, param);
             layout3.AddView(b6, param);
             layout3.AddView(b7, param);
+            layout3.AddView(b8, param);
 
             //totale layout
             layout2.Orientation = Orientation.Vertical;
@@ -168,6 +173,7 @@ namespace Running
             }
             run.Invalidate();
         }
+        //Delen van de track
         private void Sharing(object sender, EventArgs e)
         {
             AlertDialog.Builder d;
@@ -204,6 +210,26 @@ namespace Running
                 bericht += $"{pt.info}\n";
             }
             return bericht;
+        }
+        //Gaat terug naar de hoofdactivity
+        private void Terug (object sender, EventArgs e)
+        {
+            AlertDialog.Builder d;
+            d = new AlertDialog.Builder(this);
+            d.SetTitle("Weet je zeker dat je terug wilt naar het hoofdmenu?");
+            d.SetPositiveButton("Ja", Ja);
+            d.SetNegativeButton("Nee", Nee);
+            d.Show();
+
+            void Ja(object o, EventArgs ea)
+            {
+                Intent i;
+                i = new Intent(this, typeof(Multiclass));
+                StartActivity(i);
+            }
+
+            void Nee(object o, EventArgs ea)
+            { }
         }
     }
 
