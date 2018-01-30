@@ -13,11 +13,11 @@ namespace Running
     public class AnalysisDisplay : Activity
     {
         public TextView text;
-
+        public static string deelbaarBericht;
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
-            string deelbaarBericht = "";
+            deelbaarBericht = "";
             text = new TextView(this);
             //deelbaarBericht moet je de highlights aan toevoegen (maxsnelheid, gelopen afstand, gelopen tijd + wat info om het 'menselijk' te maken
             text.Text = deelbaarBericht;

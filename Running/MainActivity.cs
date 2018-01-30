@@ -139,7 +139,6 @@ namespace Running
         //Laden van faketrack
         public void Laden(object sender, EventArgs e)
         {
-
             string content;
             using (StreamReader sr = new StreamReader(this.Assets.Open("faketrack.txt")))
             {
@@ -184,7 +183,7 @@ namespace Running
                 Intent i;
                 i = new Intent(Intent.ActionSend);
                 i.SetType("text/plain");
-                i.PutExtra(Intent.ExtraText, MaakBericht());
+                i.PutExtra(Intent.ExtraText, AnalysisDisplay.deelbaarBericht);
                 this.StartActivity(i);
             }
             void Niks(object o, EventArgs ea)
