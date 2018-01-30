@@ -7,6 +7,7 @@ using Android.Content;
 using Android.Hardware;
 using Android.Locations;
 using System;
+using System.IO;
 using System.Collections.Generic;
 using static Android.Views.GestureDetector;
 
@@ -54,12 +55,12 @@ namespace Running
             b4.Text = "Stop";
             b5 = new Button(this);
             b5.TextSize = size;
-            b5.Text = "Terug";
+            b5.Text = "Laden";
             b1.Click += B1_Click;
             b2.Click += B2_Click;
             b3.Click += B3_Click;
             b4.Click += B4_Click;
-            b5.Click += B5_Click;
+            b5.Click += Laden;
 
             //layout van de buttons
             layout.Orientation = Orientation.Horizontal;
@@ -77,26 +78,6 @@ namespace Running
             SetContentView(layout2);
         }
 
-        //Gaat terug naar de hoofdactivity
-        private void B5_Click(object sender, EventArgs e)
-        {
-            AlertDialog.Builder d;
-            d = new AlertDialog.Builder(this);
-            d.SetTitle("Weet je zeker dat je terug wilt naar het hoofdmenu?");
-            d.SetPositiveButton("ja", Ja);
-            d.SetNegativeButton("nee", Nee);
-            d.Show();
-
-            void Ja(object o, EventArgs ea)
-            {
-                Intent i;
-                i = new Intent(this, typeof(Multiclass));
-                StartActivity(i);
-            }
-
-            void Nee(object o, EventArgs ea)
-            { }
-        }
 
         //wat gebeurd er als je de kaart moet centreren
         private void B1_Click(object sender, System.EventArgs e)
@@ -132,6 +113,39 @@ namespace Running
                 run.Erase();
             }
         }
+        //Laden van faketrack
+        public void Laden(object sender, EventArgs e)
+        {
+
+            string content;
+            using (StreamReader sr = new StreamReader(this.Assets.Open("faketrack.txt")))
+            {
+                content = sr.ReadToEnd();
+            }
+
+            using (StringReader sr = new StringReader(content))
+            {
+                run.lijst = new List<PuntEnTijd>();
+                string regel;
+                while((regel = sr.ReadLine()) != null)
+                {
+                    Console.WriteLine(regel);
+                    string[] woorden;
+                    woorden = regel.Split(' ');
+                    run.lijst.Add(
+                        new PuntEnTijd(
+                            new PointF(float.Parse(woorden[0]), float.Parse(woorden[1])),
+                            new DateTime(int.Parse(woorden[2]),
+                            int.Parse(woorden[3]),
+                            int.Parse(woorden[4]),
+                            int.Parse(woorden[5]),
+                            int.Parse(woorden[6]),
+                            int.Parse(woorden[7])
+                            )));
+                }
+            }
+            run.Invalidate();
+        }
     }
 
     public class RunningView : View, ISensorEventListener, ILocationListener, ScaleGestureDetector.IOnScaleGestureListener, IOnGestureListener
@@ -149,6 +163,7 @@ namespace Running
 
         //initialiseer de eigen view
         public RunningView(Context c) : base(c)
+
         {
             BitmapFactory.Options options;
             options = new BitmapFactory.Options();
@@ -225,6 +240,8 @@ namespace Running
             Routes.share.Visibility = ViewStates.Invisible;
             this.Invalidate();
         }
+
+        
 
         //tekent de kaart
         protected override void OnDraw(Canvas canvas)
@@ -443,8 +460,8 @@ namespace Running
         public PuntEnTijd(PointF p, DateTime dt)
         {
             punt = new PointF(p.X, p.Y);
-            tijd = new DateTime();
-            info = $"({punt.X},{punt.Y}), {tijd.ToString("HH:mm:ss")}";
+	    tijd = dt;
+            info = $"{punt.X} {punt.Y} {tijd.ToString("yyyy MM dd HH mm ss")}";
         }
     }
 }

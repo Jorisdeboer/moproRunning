@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using Android.App;
 using Android.Content;
 using Android.Graphics;
@@ -6,27 +7,29 @@ using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
+using System.Collections.Generic;
+
 
 namespace Running
 {
     [ActivityAttribute(Label = "Running", MainLauncher = false)]
     class Routes : Activity
     {
-        public static Button b1, share, analyze;
+        Button b1, share, opslaan, laden;
         public TextView txt;
-        string bericht;
+        public string file1;
 
         protected override void OnCreate(Bundle b)
         {
             base.OnCreate(b);
-            txt = new TextView(this);
-            txt.Text = "Fake Track";
 
             LinearLayout.LayoutParams param;
             param = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent, 0.25f);
             //de omlijsting van de buttons
-            param.SetMargins(5, 0, 5, 0);
-            bericht = "";
+            param.SetMargins(linkerdeel, 0, 0, 0);
+
+            txt = new TextView(this);
+            txt.Text = "Fake Track";
 
             //de buttons van deze pagina
             b1 = new Button(this);
@@ -35,6 +38,12 @@ namespace Running
             share = new Button(this);
             share.Text = "Share";
             share.Click += Sharing;
+            opslaan = new Button(this);
+            opslaan.Text = "Route opslaan";
+            opslaan.Click += Opslaan;
+            laden = new Button(this);
+            laden.Text = "Laden";
+            laden.Click += Laden;
 
             analyze = new Button(this);
             analyze.Text = "Analyzeer";
@@ -49,7 +58,6 @@ namespace Running
 
             routelayout.AddView(txt);
             routelayout.AddView(share, param);
-            routelayout.AddView(analyze, param);
 
             layout.AddView(b1);
             layout.AddView(routelayout);
@@ -57,20 +65,19 @@ namespace Running
             this.SetContentView(layout);
         }
 
-        private void Analyze(object sender, EventArgs e)
+        //hier wordt een string gemaakt met alle coordinaten en hun tijd, die gebruikt kan worden voor share en voor save
+        public static string MaakBericht()
         {
-            Intent i;
-            i = new Intent(this, typeof(AnalyseActivity));
-            StartActivity(i);
-        }
-
-        private void Sharing(object sender, EventArgs e)
-        {
-            //loop over de hele lijst, zodat alle elementen in het bericht komen
+            string bericht = "";
             foreach (PuntEnTijd pt in MainActivity.run.lijst)
             {
-                bericht += $" {pt.info} \n"; 
+                bericht += $"{pt.info}\n";
             }
+            return bericht;
+        }
+    	
+	private void Sharing(object sender, EventArgs e)
+        {
 
             //info om de track te kunnen sharen
             AlertDialog.Builder d;
@@ -87,7 +94,7 @@ namespace Running
                 Intent i;
                 i = new Intent(Intent.ActionSend);
                 i.SetType("text/plain");
-                i.PutExtra(Intent.ExtraText, bericht);
+                i.PutExtra(Intent.ExtraText, MaakBericht());
                 this.StartActivity(i);
             }
 
@@ -121,6 +128,45 @@ namespace Running
 
             void Nee(object o, EventArgs ea)
             { }
+        }
+
+        public void Opslaan(object o, EventArgs ea)
+        {   
+            string dir1 = System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal);
+            string dir2 = Android.OS.Environment.ExternalStorageDirectory.AbsolutePath;
+            string dir3 = System.IO.Path.Combine(dir2, "Routes");
+            if (!Directory.Exists(dir3))
+                Directory.CreateDirectory(dir3);
+            file1 = System.IO.Path.Combine(dir3, "route.txt");
+            File.WriteAllText(file1, MaakBericht());        
+        }
+
+        private void Laden(object o, EventArgs ea)
+
+        {
+            string dir1 = System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal);
+            string dir2 = Android.OS.Environment.ExternalStorageDirectory.AbsolutePath;
+            string dir3 = System.IO.Path.Combine(dir2, "Routes");
+            if (!Directory.Exists(dir3))
+                Directory.CreateDirectory(dir3);
+            file1 = System.IO.Path.Combine(dir3, "route.txt");
+            MainActivity.run.lijst = new List<PuntEnTijd>();
+
+            foreach (string regel in File.ReadLines(file1))
+            {
+                string[] woorden;
+                    woorden = regel.Split(' ');
+                MainActivity.run.lijst.Add(
+                    new PuntEnTijd(
+                        new PointF(float.Parse(woorden[0]), float.Parse(woorden[1])),
+                        new DateTime(int.Parse(woorden[2]),
+                        int.Parse(woorden[3]),
+                        int.Parse(woorden[4]),
+                        int.Parse(woorden[5]),
+                        int.Parse(woorden[6]),
+                        int.Parse(woorden[7])
+                        )));
+            }
         }
     }
 }
