@@ -47,11 +47,13 @@ namespace Running
         float graphx, graphy, grafiekafstand, grafiekbreedte, maxafstand;
         PointF eerstepunt = MainActivity.run.lijst.ElementAt(0).punt;
         DateTime eerstetijd = MainActivity.run.lijst.ElementAt(0).tijd;
+        DateTime vorig;
 
         public Analyse(Context c) : base(c)
         {
             this.SetBackgroundColor(Color.Beige);
             maxafstand = 0;
+            vorig = eerstetijd;
             this.Invalidate();
         }
 
@@ -96,17 +98,17 @@ namespace Running
 
             //array met snelheden
             float[] snelheden = new float[MainActivity.run.lijst.Count];
-            for(int i = 0; i < snelheden.Length; i++)
+            for(int i = 0; i < MainActivity.run.lijst.Count; i++)
             {
-                DateTime vorig;
-                float dt = BepaalTijd(MainActivity.run.lijst.ElementAt(0).tijd, MainActivity.run.lijst.ElementAt(i).tijd);
+                float afstand = 0;
+                int plek = 0;
+                float dt = BepaalTijd(vorig, MainActivity.run.lijst.ElementAt(i).tijd);
+                afstand += afstanden[i];
                 if (dt >= 5f)
                 {
-
-                }
-
-                else
-                {
+                    snelheden[plek] = (float)(afstand / dt);
+                    vorig = MainActivity.run.lijst.ElementAt(i).tijd;
+                    plek++;
                 }
             }
 
@@ -121,7 +123,7 @@ namespace Running
             gemsnelheid = ((float)maxafstand / (float)maxtijd);
 
             //maxsnelheid in m/s
-            maxsnelheid = 0;
+            maxsnelheid = snelheden.Max();
 
             //SNELHEID EN TIJD
             //achtergrond van de grafiek
@@ -153,11 +155,22 @@ namespace Running
             {
                 int stapgrootte = (int)(grafiekbreedte / maxtijd);
                 for (float i = 0; i < grafiekbreedte; i += stapgrootte)
+                {
                     cv.DrawLine(graphx + i, graphy, graphx + i, this.Height - grafiekafstand, verf);
+                    cv.DrawText(i.ToString(), graphx + i, graphy - 15, verf);
+                }
             }
 
             //verticale zijlijn - snelheid
             cv.DrawLine(graphx, graphy, graphx, this.Height - grafiekafstand, verf);
+            if(maxsnelheid > 0)
+            {
+                float stapgrootte = (grafiekafstand / maxsnelheid);
+                for(float i = 0; i < maxsnelheid; i += stapgrootte)
+                {
+                    cv.DrawLine(graphx, graphy + i, grafiekbreedte, graphy + i, verf);
+                }
+            }
 
             //for-loop om een lijn te tekenen tussen vorige punt en nieuwe punt.
             for (int i = 0; i<afstanden.Length - 1; i++)

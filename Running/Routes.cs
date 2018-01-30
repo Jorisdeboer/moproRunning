@@ -15,7 +15,7 @@ namespace Running
     [ActivityAttribute(Label = "Running", MainLauncher = false)]
     class Routes : Activity
     {
-        Button b1, share, opslaan, laden;
+        Button b1, share, opslaan, laden, analyze;
         public TextView txt;
         public string file1;
 
@@ -26,7 +26,7 @@ namespace Running
             LinearLayout.LayoutParams param;
             param = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent, 0.25f);
             //de omlijsting van de buttons
-            param.SetMargins(linkerdeel, 0, 0, 0);
+            param.SetMargins(0, 0, 0, 0);
 
             txt = new TextView(this);
             txt.Text = "Fake Track";
@@ -76,7 +76,7 @@ namespace Running
             return bericht;
         }
     	
-	private void Sharing(object sender, EventArgs e)
+	    private void Sharing(object sender, EventArgs e)
         {
 
             //info om de track te kunnen sharen
@@ -108,6 +108,12 @@ namespace Running
 
             void Niks(object o, EventArgs ea)
             { }
+        }
+
+        private void Analyze(object o, EventArgs e)
+        {
+            Intent i = new Intent(this, typeof(AnalyseActivity));
+            StartActivity(i);
         }
 
         private void B1_Click(object sender, EventArgs e)
