@@ -2,17 +2,15 @@
 using Android.App;
 using Android.Content;
 using Android.OS;
-using Android.Runtime;
-using Android.Views;
 using Android.Widget;
-using Android.Graphics;
 
 namespace Running
 {
     [Activity(Label = "Running", MainLauncher = true)]
     class Multiclass : Activity
     {
-        Button b1, b3;
+
+        Button b1, b2;
 
         protected override void OnCreate(Bundle b)
         {
@@ -23,11 +21,10 @@ namespace Running
 
             b1 = new Button(this);
             b1.Text = "Open Map";
-            b3 = new Button(this);
-            b3.Text = "Afsluiten";
-
+            b2 = new Button(this);
+            b2.Text = "Afsluiten";
             b1.Click += clicked;
-            b3.Click += clicked3;
+            b2.Click += clicked2;
 
             LinearLayout layout;
             layout = new LinearLayout(this);
@@ -35,7 +32,7 @@ namespace Running
 
             layout.AddView(t1);
             layout.AddView(b1);
-            layout.AddView(b3);
+            layout.AddView(b2);
 
             this.SetContentView(layout);
         }
@@ -47,7 +44,7 @@ namespace Running
             StartActivity(i);
         }
 
-        private void clicked3(object sender, EventArgs e)
+        private void clicked2(object sender, EventArgs e)
         {
             AlertDialog.Builder d;
             d = new AlertDialog.Builder(this);
