@@ -16,7 +16,9 @@ namespace Running
     [ActivityAttribute(Label = "Running", MainLauncher = false)]
     public class MainActivity : Activity
     {
-        Button b1, b2, b3, b4, b5, b6, b7, b8;
+        Button b1, b2, b3, b4, b5, b6, b8;
+        public static Button b7;
+        public static bool vis;
         float size;
         public static RunningView run;
 
@@ -39,6 +41,7 @@ namespace Running
             //de omlijsting van de buttons
             param.SetMargins(2, 0, 2, 20);
             size = 12;
+            vis = false;
 
             //alle buttons op een rij
             b1 = new Button(this);
@@ -62,6 +65,7 @@ namespace Running
             b7 = new Button(this);
             b7.TextSize = size;
             b7.Text = "Analyseer";
+            b7.Visibility = ViewStates.Invisible;
             b8 = new Button(this);
             b8.TextSize = size;
             b8.Text = "Hoofdmenu";
@@ -76,6 +80,7 @@ namespace Running
             b8.Click += Terug;
 
             //layout van de buttons
+            layout.SetBackgroundColor(Color.Beige);
             layout.Orientation = Orientation.Horizontal;
             layout.AddView(b1, param);
             layout.AddView(b2, param);
@@ -83,6 +88,7 @@ namespace Running
             layout.AddView(b3, param);
 
             //layout buttons onder de map
+            layout3.SetBackgroundColor(Color.Beige);
             layout3.Orientation = Orientation.Horizontal;
             layout3.AddView(b5, param);
             layout3.AddView(b6, param);
@@ -90,6 +96,7 @@ namespace Running
             layout3.AddView(b8, param);
 
             //totale layout
+            layout2.SetBackgroundColor(Color.Beige);
             layout2.Orientation = Orientation.Vertical;
             layout2.AddView(layout);
             layout2.AddView(run, paramrun);
@@ -98,7 +105,6 @@ namespace Running
             //display de kaart met de buttons erboven (layout2)
             SetContentView(layout2);
         }
-
 
         //wat gebeurd er als je de kaart moet centreren
         private void B1_Click(object sender, System.EventArgs e)
@@ -138,12 +144,17 @@ namespace Running
         //Start Analyseren
         private void Analyseer(object sender, System.EventArgs e)
         {
-            Intent i = new Intent(this, typeof(AnalyseActivity));
-            StartActivity(i);
+            if(vis == true)
+            {
+                Intent i = new Intent(this, typeof(AnalyseActivity));
+                StartActivity(i);
+            }
         }
         //Laden van faketrack
         public void Laden(object sender, EventArgs e)
         {
+            vis = true;
+            b7.Visibility = ViewStates.Visible;
             string content;
             using (StreamReader sr = new StreamReader(this.Assets.Open("faketrack.txt")))
             {
@@ -192,6 +203,7 @@ namespace Running
                 i.PutExtra(Intent.ExtraText, AnalysisDisplay.deelbaarBericht);
                 this.StartActivity(i);
             }
+            
             void Niks(object o, EventArgs ea)
             { }
 
@@ -248,7 +260,6 @@ namespace Running
 
         //initialiseer de eigen view
         public RunningView(Context c) : base(c)
-
         {
             BitmapFactory.Options options;
             options = new BitmapFactory.Options();
@@ -289,7 +300,6 @@ namespace Running
             centrum.X = Math.Min(plek.X, 142000 - ((this.Width / 2) / Schaal / 0.4f));
             centrum.Y = Math.Min(plek.Y, 458000 - ((this.Height / 2) / Schaal / 0.4f));
             centrum.Y = Math.Max(plek.Y, 453000 + ((this.Height / 2) / Schaal / 0.4f));
-
             this.Invalidate();
         }
 
@@ -300,6 +310,8 @@ namespace Running
             {
                 lijst = new List<PuntEnTijd>();
                 start = true;
+                MainActivity.vis = true;
+                MainActivity.b7.Visibility = ViewStates.Visible;
                 this.Invalidate();
             }
         }
@@ -318,10 +330,10 @@ namespace Running
         public void Erase()
         {
             lijst.Clear();
+            MainActivity.vis = false;
+            MainActivity.b7.Visibility = ViewStates.Invisible;
             this.Invalidate();
         }
-
-        
 
         //tekent de kaart
         protected override void OnDraw(Canvas canvas)
