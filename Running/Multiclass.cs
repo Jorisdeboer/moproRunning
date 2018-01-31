@@ -1,6 +1,7 @@
 ﻿using System;
 using Android.App;
 using Android.Content;
+using Android.Graphics;
 using Android.OS;
 using Android.Widget;
 
@@ -9,7 +10,6 @@ namespace Running
     [Activity(Label = "Running", MainLauncher = true)]
     class Multiclass : Activity
     {
-
         Button b1, b2;
 
         protected override void OnCreate(Bundle b)
@@ -18,6 +18,7 @@ namespace Running
             TextView t1;
             t1 = new TextView(this);
             t1.Text = "Kies wat je wilt doen";
+            t1.TextSize = 40;
 
             b1 = new Button(this);
             b1.Text = "Open Map";
@@ -29,6 +30,7 @@ namespace Running
             LinearLayout layout;
             layout = new LinearLayout(this);
             layout.Orientation = Orientation.Vertical;
+            layout.SetBackgroundColor(Color.Beige);
 
             layout.AddView(t1);
             layout.AddView(b1);

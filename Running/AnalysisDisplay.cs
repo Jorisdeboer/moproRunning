@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using Android.App;
 using Android.Content;
 using Android.OS;
-using Android.Graphics;
-using Android.Views;
 using Android.Widget;
+using Android.Graphics;
 
 namespace Running
 {
@@ -14,15 +12,16 @@ namespace Running
     {
         public TextView text;
         public static string deelbaarBericht;
+
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
-            deelbaarBericht = "";
+            deelbaarBericht = $"Ik heb {Analyse.maxafstand} gelopen.\nHier heb ik {Analyse.maxtijd} seconden over gedaan.\nMijn gemiddelde snelheid was dus {Analyse.gemsnelheid}!\n\nKan jij dit verbeteren?";
             text = new TextView(this);
-            //deelbaarBericht moet je de highlights aan toevoegen (maxsnelheid, gelopen afstand, gelopen tijd + wat info om het 'menselijk' te maken
             text.Text = deelbaarBericht;
             LinearLayout layout = new LinearLayout(this);
             layout.Orientation = Orientation.Vertical;
+            layout.SetBackgroundColor(Color.Beige);
 
             Button b = new Button(this);
             b.Click += B_Click;
