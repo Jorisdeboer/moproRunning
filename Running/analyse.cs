@@ -44,7 +44,7 @@ namespace Running
     {
         //variabelen nodig in analyse
         public List<string> tijd;
-        float graphx, graphy, grafiekafstand, grafiekbreedte;
+        float graphx, graphy, grafiekafstand, grafiekbreedte, stapsnelheid, staptijd;
         public static float maxafstand, maxtijd, maxsnelheid, gemsnelheid;
 
         PointF eerstepunt = MainActivity.run.lijst.ElementAt(0).punt;
@@ -61,7 +61,7 @@ namespace Running
         protected override void OnDraw(Canvas cv)
         {
             base.OnDraw(cv);
-            //x = beginpunt x; y = beginpunt y
+            //graphx is het beginpunt van x; graphy is het beginpunt van y
             graphx = (float)this.Width * 0.1f;
             graphy = (float)this.Height * (6f / 7f);
             //afstand is hoogte van grafiek, breedte is breedte van grafiek
@@ -85,7 +85,10 @@ namespace Running
                 {
                     afstanden[i] = BepaalAfstand(MainActivity.run.lijst.ElementAt(i - 1).punt, MainActivity.run.lijst.ElementAt(i).punt);
                     tijden[i] = BepaalTijd(MainActivity.run.lijst.ElementAt(i - 1).tijd, MainActivity.run.lijst.ElementAt(i).tijd);
-                    snelheden[i] = afstanden[i] / tijden[i];
+                    if (tijden[i] == 0)
+                        snelheden[i] = 0;
+                    else
+                        snelheden[i] = (afstanden[i] / tijden[i]);
                 }
             }
 
@@ -110,39 +113,42 @@ namespace Running
 
             //info over binnenlijnen - verticaal
             verf.Color = Color.Red;
-            verf.StrokeWidth = 3;
+            verf.StrokeWidth = 2;
             verf.TextSize = 20;
-            if (maxtijd > 0f)
+            staptijd = Math.Max((grafiekbreedte / maxtijd), (grafiekbreedte/12));
+            float astijd = 0f;
+            for (float i = 0; i < grafiekbreedte - staptijd; i += staptijd)
             {
-                float stapgrootte = Math.Max((grafiekbreedte / maxtijd), (grafiekbreedte/6));
-                float asgetal = 0f;
-                for (float i = 0; i < grafiekbreedte; i += stapgrootte)
-                {
-                    cv.DrawLine(graphx + i, graphy, graphx + i, this.Height - grafiekafstand, verf);
-                    verf.Color = Color.Blue;
-                    cv.DrawText(asgetal.ToString(), graphx + i, graphy + 20, verf);
-                    asgetal += 10f;
-                    verf.Color = Color.Red;
-                }
+                cv.DrawLine(graphx + i, graphy, graphx + i, this.Height - grafiekafstand, verf);
+                verf.Color = Color.Blue;
+                cv.DrawText(astijd.ToString(), graphx + i, graphy + 20, verf);
+                astijd += 5f;
+                verf.Color = Color.Red;
             }
 
             //info over binnelijnen - horizontaal
-            verf.Color = Color.Red;
-            verf.StrokeWidth = 3;
-            verf.TextSize = 20;
-            if (maxsnelheid > 0)
+            stapsnelheid = Math.Max((grafiekafstand / maxsnelheid), (grafiekafstand/12));
+            float asgetal = 0f;
+            for(float i = 0; i < (this.Height - grafiekafstand + stapsnelheid); i += stapsnelheid)
             {
-                float stapgrootte = Math.Max((grafiekafstand / maxsnelheid), (grafiekafstand/6));
-                float asgetal = 0f;
-                for(float i = 0; i < (this.Height - grafiekafstand + stapgrootte); i += stapgrootte)
-                {
-                    cv.DrawLine(graphx, graphy - i, grafiekbreedte, graphy - i, verf);
-                    verf.Color = Color.Blue;
-                    cv.DrawText(asgetal.ToString(), graphx - 40, graphy - i, verf);
-                    asgetal += 10f;
-                    verf.Color = Color.Red;
-                }
+                cv.DrawLine(graphx, graphy - i, grafiekbreedte, graphy - i, verf);
+                verf.Color = Color.Blue;
+                cv.DrawText(asgetal.ToString(), graphx - 40, graphy - i, verf);
+                asgetal += 5f;
+                verf.Color = Color.Red;
             }
+
+            //om de snelheid over de tijd in de grafiek weer te geven
+            verf.Color = Color.Green;
+            verf.StrokeWidth = 4;
+            float stap = (tijden.Length/12f);
+            float schaalmeter = (grafiekafstand / 60f);
+            for (int i = 0; i < 10; i ++)
+            {
+                cv.DrawLine(graphx + (staptijd*i), graphy - ((snelheden[(int)stap*i])*schaalmeter), graphx + (staptijd*(i+1)), graphy - ((snelheden[(int)stap*(i+1)])*schaalmeter), verf);
+            }
+            cv.DrawLine(graphx + (staptijd * 10), graphy - ((snelheden[(int)stap * 10]) * schaalmeter), (grafiekbreedte), graphy, verf);
+
             verf.Color = Color.Black;
             verf.StrokeWidth = 8;
             //verticale zijlijn - snelheid
@@ -150,15 +156,21 @@ namespace Running
             //horizontale zijlijn - tijd
             cv.DrawLine(graphx, graphy, grafiekbreedte, graphy, verf);
 
+            //tekst lang de zijkanten
             verf.Color = Color.Blue;
             cv.DrawText("snelheid (m/s)", (graphx - 40), (this.Height - grafiekafstand - 20), verf);
             cv.DrawText("tijd (sec)", (grafiekbreedte + 20), (graphy + 20), verf);
 
-            //for-loop om een lijn te tekenen tussen vorige punt en nieuwe punt.
-            for (int i = 0; i < grafiekbreedte; i++)
-            {
-                
-            }
+            //tekst met informatie
+            verf.Color = Color.Black;
+            verf.TextSize = 40;
+            float afstand = (float)(this.Height - grafiekafstand);
+            float tekstpositie = (afstand / 8);
+            cv.DrawText($"Duratie: {maxtijd} seconden", graphx, tekstpositie * 2, verf);
+            cv.DrawText($"Gelopen afstand: {maxafstand} meter", graphx, tekstpositie * 3, verf);
+            cv.DrawText($"Gemiddelde snelheid: {gemsnelheid} meter/seconde", graphx, tekstpositie * 4, verf);
+            cv.DrawText($"Maximaal bereikte snelheid: {maxsnelheid} meter/seconde", graphx, tekstpositie * 5, verf);
+
         }
 
         //bepaal het verschil in seconden tussen twee tijden
