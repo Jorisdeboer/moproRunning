@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Collections.Generic;
 using Android.App;
 using Android.Content;
 using Android.OS;
@@ -43,11 +42,8 @@ namespace Running
     public class Analyse : View
     {
         //variabelen nodig in analyse
-        public List<string> tijd;
         float graphx, graphy, grafiekafstand, grafiekbreedte, stapsnelheid, staptijd;
         public static float maxafstand, maxtijd, maxsnelheid, gemsnelheid;
-
-        PointF eerstepunt = MainActivity.run.lijst.ElementAt(0).punt;
         DateTime eerstetijd = MainActivity.run.lijst.ElementAt(0).tijd;
 
         public Analyse(Context c) : base(c)
@@ -126,7 +122,7 @@ namespace Running
                 verf.Color = Color.Red;
             }
 
-            //info over binnelijnen - horizontaal
+            //info over binnenlijnen - horizontaal
             stapsnelheid = Math.Max((grafiekafstand / maxsnelheid), (grafiekafstand/12));
             float asgetal = 0f;
             for(float i = 0; i < (this.Height - grafiekafstand + stapsnelheid); i += stapsnelheid)

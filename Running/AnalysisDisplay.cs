@@ -16,8 +16,10 @@ namespace Running
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
-            deelbaarBericht = $"Ik heb {Analyse.maxafstand} gelopen.\nHier heb ik {Analyse.maxtijd} seconden over gedaan.\nMijn gemiddelde snelheid was dus {Analyse.gemsnelheid}!\n\nKan jij dit verbeteren?";
+            deelbaarBericht = $"Ik heb {Analyse.maxafstand} meter gelopen.\nHier heb ik {Analyse.maxtijd} seconden over gedaan.\nMijn gemiddelde snelheid was dus {Analyse.gemsnelheid} m/s!\n\nKan jij dit verbeteren?";
             text = new TextView(this);
+            text.SetTextColor(Color.Black);
+            text.TextSize = 20;
             text.Text = deelbaarBericht;
             LinearLayout layout = new LinearLayout(this);
             layout.Orientation = Orientation.Vertical;

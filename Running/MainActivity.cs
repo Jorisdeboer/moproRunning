@@ -62,14 +62,17 @@ namespace Running
             b6 = new Button(this);
             b6.TextSize = size;
             b6.Text = "Delen";
-            b7 = new Button(this);
-            b7.TextSize = size;
-            b7.Text = "Analyseer";
-            b7.Visibility = ViewStates.Invisible;
             b8 = new Button(this);
             b8.TextSize = size;
             b8.Text = "Hoofdmenu";
 
+            //public button
+            b7 = new Button(this);
+            b7.TextSize = size;
+            b7.Text = "Analyseer";
+            b7.Visibility = ViewStates.Invisible;
+
+            //alle eventhandlers van de buttons
             b1.Click += B1_Click;
             b2.Click += B2_Click;
             b3.Click += B3_Click;
@@ -150,6 +153,7 @@ namespace Running
                 StartActivity(i);
             }
         }
+
         //Laden van faketrack
         public void Laden(object sender, EventArgs e)
         {
@@ -184,6 +188,7 @@ namespace Running
             }
             run.Invalidate();
         }
+
         //Delen van de track
         private void Sharing(object sender, EventArgs e)
         {
@@ -213,6 +218,7 @@ namespace Running
                 StartActivity(i);
             }
         }
+        
         //hier wordt een string gemaakt met alle coordinaten en hun tijd, die gebruikt kan worden voor share en voor save
         public static string MaakBericht()
         {
@@ -223,6 +229,7 @@ namespace Running
             }
             return bericht;
         }
+
         //Gaat terug naar de hoofdactivity
         private void Terug (object sender, EventArgs e)
         {
@@ -552,7 +559,7 @@ namespace Running
         public PuntEnTijd(PointF p, DateTime dt)
         {
             punt = new PointF(p.X, p.Y);
-	    tijd = dt;
+	        tijd = dt;
             info = $"{punt.X} {punt.Y} {tijd.ToString("yyyy MM dd HH mm ss")}";
         }
     }

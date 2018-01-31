@@ -18,7 +18,8 @@ namespace Running
             TextView t1;
             t1 = new TextView(this);
             t1.Text = "Kies wat je wilt doen";
-            t1.TextSize = 40;
+            t1.SetTextColor(Color.Black);
+            t1.TextSize = 30;
 
             b1 = new Button(this);
             b1.Text = "Open Map";
