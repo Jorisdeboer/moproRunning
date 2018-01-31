@@ -14,10 +14,11 @@ namespace Running
     {
         public TextView text;
         public static string deelbaarBericht;
+        
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
-            deelbaarBericht = "";
+            deelbaarBericht = $"Ik heb {Analyse.maxafstand} gelopen. Hier heb ik {Analyse.maxtijd}seconden over gedaan. Mijn gemiddelde snelheid was dus {Analyse.gemsnelheid} ! Goed hé?!";
             text = new TextView(this);
             //deelbaarBericht moet je de highlights aan toevoegen (maxsnelheid, gelopen afstand, gelopen tijd + wat info om het 'menselijk' te maken
             text.Text = deelbaarBericht;
