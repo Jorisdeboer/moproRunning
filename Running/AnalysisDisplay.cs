@@ -41,5 +41,4 @@ namespace Running
             StartActivity(i);
         }
     }
-
 }
